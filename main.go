@@ -40,6 +40,8 @@ func main() {
 		v1.POST("/documents", documentController.CreateDocument)
 		v1.GET("/documents", documentController.ListDocuments)
 		v1.GET("/documents/:id", documentController.GetDocument)
+		v1.PUT("/documents/:id", documentController.UpdateDocument)
+		v1.PATCH("/documents/:id", documentController.PartialUpdateDocument)
 		v1.DELETE("/documents/:id", documentController.DeleteDocument)
 	}
 

@@ -7,7 +7,7 @@ A RESTful document storage API built with Go, featuring a clean layered architec
 - **RESTful API**: HTTP endpoints for document management
 - **Layered Architecture**: Clean separation of concerns (Models → Services → Controllers)
 - **Thread-Safe Operations**: Uses RWMutex for concurrent read/write access
-- **CRUD Operations**: Create, Read, Update, Delete, and List documents
+- **Full CRUD Operations**: Create, Read, Update (PUT/PATCH), Delete, and List documents
 - **Swagger Documentation**: Auto-generated API documentation
 - **Comprehensive Testing**: Unit tests for all layers including concurrency testing
 - **Error Handling**: Proper HTTP status codes and error messages
@@ -90,6 +90,8 @@ go test -v ./...
 | POST | `/api/v1/documents` | Create a new document |
 | GET | `/api/v1/documents` | List all documents |
 | GET | `/api/v1/documents/{id}` | Get document by ID |
+| PUT | `/api/v1/documents/{id}` | Update entire document |
+| PATCH | `/api/v1/documents/{id}` | Partially update document |
 | DELETE | `/api/v1/documents/{id}` | Delete document by ID |
 
 ### Document Structure
@@ -124,6 +126,26 @@ curl http://localhost:8080/api/v1/documents/doc-1
 curl http://localhost:8080/api/v1/documents
 ```
 
+#### Update Document (PUT)
+```bash
+curl -X PUT http://localhost:8080/api/v1/documents/doc-1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "doc-1",
+    "name": "Updated Document Name",
+    "description": "Updated description"
+  }'
+```
+
+#### Partially Update Document (PATCH)
+```bash
+curl -X PATCH http://localhost:8080/api/v1/documents/doc-1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Only Update Name"
+  }'
+```
+
 #### Delete Document
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/documents/doc-1
@@ -144,7 +166,8 @@ The application follows a clean 3-layer architecture:
 
 ### **Models Layer** (`models/`)
 - **Document**: Core data structure
-- **DocumentStore**: Thread-safe in-memory storage with CRUD operations
+- **DocumentStore**: Thread-safe in-memory storage with full CRUD operations
+- **Update Operations**: Full replacement (PUT) and partial updates (PATCH)
 - Uses `sync.RWMutex` for concurrent access control
 
 ### **Services Layer** (`services/`)
@@ -208,42 +231,6 @@ go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
 
-### Test Dependencies
-
-The controller tests use `testify/assert` for cleaner assertions:
-```bash
-go get github.com/stretchr/testify/assert
-```
-
-## Thread Safety
-
-The DocumentStore uses `sync.RWMutex` to ensure thread safety:
-
-- **Read Operations** (Get, List): Use `RLock()` allowing multiple concurrent readers
-- **Write Operations** (Create, Delete): Use `Lock()` for exclusive access
-- **Automatic Cleanup**: `defer` statements ensure locks are always released
 
 
 
-### Code Quality
-
-```bash
-# Format code
-go fmt ./...
-
-# Vet code
-go vet ./...
-
-# Run linter (if golangci-lint installed)
-golangci-lint run
-
-
-
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request

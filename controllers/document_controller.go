@@ -79,6 +79,68 @@ func (ctrl *DocumentController) ListDocuments(c *gin.Context) {
 	c.JSON(http.StatusOK, docs)
 }
 
+// UpdateDocument godoc
+// @Summary Update a document (PUT)
+// @Description Replace an entire document with new data
+// @Tags documents
+// @Accept json
+// @Produce json
+// @Param id path string true "Document ID"
+// @Param document body models.Document true "Document data to update"
+// @Success 200 {object} models.Document
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /documents/{id} [put]
+func (ctrl *DocumentController) UpdateDocument(c *gin.Context) {
+	id := c.Param("id")
+	var doc models.Document
+
+	if err := c.ShouldBindJSON(&doc); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := ctrl.service.UpdateDocument(id, doc); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return the updated document
+	updatedDoc, _ := ctrl.service.GetDocument(id)
+	c.JSON(http.StatusOK, updatedDoc)
+}
+
+// PartialUpdateDocument godoc
+// @Summary Partially update a document (PATCH)
+// @Description Update specific fields of a document
+// @Tags documents
+// @Accept json
+// @Produce json
+// @Param id path string true "Document ID"
+// @Param updates body map[string]interface{} true "Fields to update"
+// @Success 200 {object} models.Document
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /documents/{id} [patch]
+func (ctrl *DocumentController) PartialUpdateDocument(c *gin.Context) {
+	id := c.Param("id")
+	var updates map[string]interface{}
+
+	if err := c.ShouldBindJSON(&updates); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := ctrl.service.PartialUpdateDocument(id, updates); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return the updated document
+	updatedDoc, _ := ctrl.service.GetDocument(id)
+	c.JSON(http.StatusOK, updatedDoc)
+}
+
 // DeleteDocument godoc
 // @Summary Delete a document
 // @Description Delete a document by its ID

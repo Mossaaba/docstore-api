@@ -119,3 +119,54 @@ func (s *DocumentStore) List() []Document {
 	}
 	return docs
 }
+
+/*
+Update replaces an entire document (PUT operation)
+Uses Lock() for exclusive write access
+Verifies document exists before updating
+Returns error if document not found
+*/
+func (s *DocumentStore) Update(id string, doc Document) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.documents[id]; !exists {
+		return errors.New("document not found")
+	}
+
+	// Ensure the document ID matches the path parameter
+	doc.ID = id
+	s.documents[id] = doc
+	return nil
+}
+
+/*
+PartialUpdate updates only specified fields (PATCH operation)
+Uses Lock() for exclusive write access
+Preserves existing values for unspecified fields
+Returns error if document not found
+*/
+func (s *DocumentStore) PartialUpdate(id string, updates map[string]interface{}) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	doc, exists := s.documents[id]
+	if !exists {
+		return errors.New("document not found")
+	}
+
+	// Apply updates to existing document
+	if name, ok := updates["name"]; ok {
+		if nameStr, ok := name.(string); ok {
+			doc.Name = nameStr
+		}
+	}
+	if description, ok := updates["description"]; ok {
+		if descStr, ok := description.(string); ok {
+			doc.Description = descStr
+		}
+	}
+
+	s.documents[id] = doc
+	return nil
+}
