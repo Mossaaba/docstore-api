@@ -1,0 +1,127 @@
+basePath: /api/v1
+definitions:
+  models.Document:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: A simple document storage API with CRUD operations
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Document Store API
+  version: "1.0"
+paths:
+  /documents:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all documents
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Document'
+            type: array
+      summary: List all documents
+      tags:
+      - documents
+    post:
+      consumes:
+      - application/json
+      description: Create a new document with the provided information
+      parameters:
+      - description: Document to create
+        in: body
+        name: document
+        required: true
+        schema:
+          $ref: '#/definitions/models.Document'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Document'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new document
+      tags:
+      - documents
+  /documents/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a document by its ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a document
+      tags:
+      - documents
+    get:
+      consumes:
+      - application/json
+      description: Get a document by its ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Document'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a document by ID
+      tags:
+      - documents
+swagger: "2.0"
