@@ -1,24 +1,34 @@
 # Document Store API
 
-A thread-safe, in-memory document storage system built with Go. This project demonstrates CRUD operations with proper concurrency control using Go's sync package.
+A RESTful document storage API built with Go, featuring a clean layered architecture and comprehensive testing. This project demonstrates CRUD operations with proper concurrency control, HTTP endpoints, and Swagger documentation.
 
 ## Features
 
+- **RESTful API**: HTTP endpoints for document management
+- **Layered Architecture**: Clean separation of concerns (Models → Services → Controllers)
 - **Thread-Safe Operations**: Uses RWMutex for concurrent read/write access
 - **CRUD Operations**: Create, Read, Update, Delete, and List documents
-- **Error Handling**: Proper error messages for edge cases
-- **Comprehensive Tests**: Unit tests including concurrency testing
-- **Performance Benchmarks**: Benchmark tests for performance analysis
+- **Swagger Documentation**: Auto-generated API documentation
+- **Comprehensive Testing**: Unit tests for all layers including concurrency testing
+- **Error Handling**: Proper HTTP status codes and error messages
 
 ## Project Structure
 
 ```
 docstore-api/
-├── main.go           # Demo application
-├── document.go       # Document struct and DocumentStore implementation
-├── document_test.go  # Comprehensive unit tests
-├── Dockerfile        # Container configuration
-└── README.md         # This file
+├── main.go                           # Application entry point
+├── models/
+│   ├── document.go                   # Document model and store
+│   └── document_test.go              # Model layer tests
+├── services/
+│   ├── document_service.go           # Business logic layer
+│   └── document_service_test.go      # Service layer tests
+├── controllers/
+│   ├── document_controller.go        # HTTP handlers
+│   └── document_controller_test.go   # Controller layer tests
+├── docs/                             # Swagger generated docs
+├── go.mod                            # Go module dependencies
+└── README.md                         # This file
 ```
 
 ## Quick Start
@@ -34,137 +44,175 @@ git clone <repository-url>
 cd docstore-api
 ```
 
-2. Initialize Go module:
+2. Install dependencies:
 ```bash
-go mod init docstore-api
+go mod tidy
 ```
 
-3. Run the demo:
+3. Generate Swagger documentation:
 ```bash
-go run .
+swag init
 ```
 
-4. Run tests:
+4. Run the API server:
 ```bash
-go test -v
+go run main.go
 ```
 
-5. Run benchmarks:
+5. Access the API:
+- **API Base URL**: http://localhost:8080/api/v1
+- **Swagger UI**: http://localhost:8080/swagger/index.html
+
+### Running Tests
+
 ```bash
-go test -bench=.
+# Run all tests
+go test ./...
+
+# Run tests by layer
+go test ./models
+go test ./services  
+go test ./controllers
+
+# Run with coverage
+go test -cover ./...
+
+# Run with verbose output
+go test -v ./...
 ```
 
 ## API Reference
 
+### HTTP Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/documents` | Create a new document |
+| GET | `/api/v1/documents` | List all documents |
+| GET | `/api/v1/documents/{id}` | Get document by ID |
+| DELETE | `/api/v1/documents/{id}` | Delete document by ID |
+
 ### Document Structure
-```go
-type Document struct {
-    ID          string `json:"id"`
-    Name        string `json:"name"`
-    Description string `json:"description"`
+```json
+{
+    "id": "string",
+    "name": "string", 
+    "description": "string"
 }
 ```
 
-### DocumentStore Methods
+### Example API Calls
 
 #### Create Document
-```go
-func (s *DocumentStore) Create(doc Document) error
+```bash
+curl -X POST http://localhost:8080/api/v1/documents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "doc-1",
+    "name": "My Document",
+    "description": "A sample document"
+  }'
 ```
-- Creates a new document
-- Returns error if document with same ID already exists
-- Thread-safe with exclusive lock
 
 #### Get Document
-```go
-func (s *DocumentStore) Get(id string) (Document, error)
+```bash
+curl http://localhost:8080/api/v1/documents/doc-1
 ```
-- Retrieves document by ID
-- Returns error if document not found
-- Thread-safe with shared read lock
-
-#### Delete Document
-```go
-func (s *DocumentStore) Delete(id string) error
-```
-- Removes document by ID
-- Returns error if document not found
-- Thread-safe with exclusive lock
 
 #### List All Documents
-```go
-func (s *DocumentStore) List() []Document
+```bash
+curl http://localhost:8080/api/v1/documents
 ```
-- Returns all documents as a slice
-- Thread-safe with shared read lock
-- Creates a copy to prevent external modifications
 
-## Usage Example
+#### Delete Document
+```bash
+curl -X DELETE http://localhost:8080/api/v1/documents/doc-1
+```
 
-```go
-package main
+### Response Codes
 
-import (
-    "fmt"
-    "log"
-)
+- `200 OK` - Successful GET request
+- `201 Created` - Document created successfully
+- `204 No Content` - Document deleted successfully
+- `400 Bad Request` - Invalid JSON or request format
+- `404 Not Found` - Document not found
+- `409 Conflict` - Document with ID already exists
 
-func main() {
-    // Create new document store
-    store := NewDocumentStore()
-    
-    // Create a document
-    doc := Document{
-        ID:          "1",
-        Name:        "My Document",
-        Description: "A sample document",
-    }
-    
-    if err := store.Create(doc); err != nil {
-        log.Fatal(err)
-    }
-    
-    // Retrieve the document
-    retrieved, err := store.Get("1")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("Retrieved: %+v\n", retrieved)
-    
-    // List all documents
-    docs := store.List()
-    fmt.Printf("Total documents: %d\n", len(docs))
-    
-    // Delete the document
-    if err := store.Delete("1"); err != nil {
-        log.Fatal(err)
-    }
-}
+## Architecture
+
+The application follows a clean 3-layer architecture:
+
+### **Models Layer** (`models/`)
+- **Document**: Core data structure
+- **DocumentStore**: Thread-safe in-memory storage with CRUD operations
+- Uses `sync.RWMutex` for concurrent access control
+
+### **Services Layer** (`services/`)
+- **DocumentService**: Business logic interface and implementation
+- Abstracts storage operations from HTTP layer
+- Handles business rules and validation
+
+### **Controllers Layer** (`controllers/`)
+- **DocumentController**: HTTP request handlers
+- JSON serialization/deserialization
+- HTTP status code management
+- Swagger documentation annotations
+
+### Data Flow
+```
+HTTP Request → Controller → Service → Model → Storage
+HTTP Response ← Controller ← Service ← Model ← Storage
 ```
 
 ## Testing
 
-The project includes comprehensive tests covering:
+The project includes comprehensive tests for all layers:
 
-- **Unit Tests**: All CRUD operations
-- **Error Cases**: Invalid operations and edge cases
-- **Concurrency Tests**: Thread safety verification
+### **Models Layer Tests** (`models/document_test.go`)
+- CRUD operations testing
+- Thread-safety and concurrency tests
+- Edge cases (duplicates, not found)
+- Concurrent read/write scenarios
 
+### **Services Layer Tests** (`services/document_service_test.go`)
+- Business logic validation
+- Error handling verification
+- Full workflow testing
+- Service interface compliance
 
-Run specific test types:
+### **Controllers Layer Tests** (`controllers/document_controller_test.go`)
+- HTTP endpoint testing
+- JSON request/response validation
+- Status code verification
+- Complete API workflow tests
+
+### Test Commands
+
 ```bash
 # Run all tests
-go test -v
+go test ./...
 
-# Run only concurrent tests
-go test -v -run TestDocumentStore_Concurrent
+# Run tests with coverage
+go test -cover ./...
 
-# Run benchmarks
-go test -bench=. -benchmem
+# Run specific layer tests
+go test ./models -v
+go test ./services -v
+go test ./controllers -v
 
-# Test coverage
-go test -cover
+# Run with race detection
+go test -race ./...
+
+# Generate coverage report
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+```
+
+### Test Dependencies
+
+The controller tests use `testify/assert` for cleaner assertions:
+```bash
+go get github.com/stretchr/testify/assert
 ```
 
 ## Thread Safety
@@ -175,21 +223,27 @@ The DocumentStore uses `sync.RWMutex` to ensure thread safety:
 - **Write Operations** (Create, Delete): Use `Lock()` for exclusive access
 - **Automatic Cleanup**: `defer` statements ensure locks are always released
 
-## Performance Characteristics
 
-- **Create**: O(1) average case
-- **Get**: O(1) lookup time
-- **Delete**: O(1) removal time
-- **List**: O(n) where n is number of documents
 
-## Docker Support
+### Code Quality
 
-Build and run with Docker:
 ```bash
-# Build image
-docker build -t docstore-api .
+# Format code
+go fmt ./...
 
-# Run container
-docker run docstore-api
-```
+# Vet code
+go vet ./...
 
+# Run linter (if golangci-lint installed)
+golangci-lint run
+
+
+
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request

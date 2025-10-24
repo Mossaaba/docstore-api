@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"net/http"
-	"docstore-api/services"
 	"docstore-api/models"
-	
+	"docstore-api/services"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,12 +35,12 @@ func (ctrl *DocumentController) CreateDocument(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	if err := ctrl.service.CreateDocument(doc); err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusCreated, doc)
 }
 
@@ -56,13 +56,13 @@ func (ctrl *DocumentController) CreateDocument(c *gin.Context) {
 // @Router /documents/{id} [get]
 func (ctrl *DocumentController) GetDocument(c *gin.Context) {
 	id := c.Param("id")
-	
+
 	doc, err := ctrl.service.GetDocument(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, doc)
 }
 
@@ -91,11 +91,11 @@ func (ctrl *DocumentController) ListDocuments(c *gin.Context) {
 // @Router /documents/{id} [delete]
 func (ctrl *DocumentController) DeleteDocument(c *gin.Context) {
 	id := c.Param("id")
-	
+
 	if err := ctrl.service.DeleteDocument(id); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.Status(http.StatusNoContent)
 }

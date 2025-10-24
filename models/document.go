@@ -3,10 +3,10 @@ package models
 import (
 	"errors"
 	"sync"
-) 
+)
 
 /*
-This is documnet struct : 
+This is documnet struct :
 */
 type Document struct {
 	ID          string `json:"id"`
@@ -20,7 +20,6 @@ DocumentStore - A struct type that acts as a container for documents
 mu sync.RWMutex - A read-write mutex for thread safety. This allows multiple concurrent readers OR one exclusive writer
 documents map[string]Document - A map that stores documents with string keys (likely document IDs) and Document values
 
-
 Multiple goroutines can read from the store simultaneously
 Only one goroutine can write at a time
 Reads are blocked during writes, but writes wait for all reads to complete
@@ -29,7 +28,6 @@ type DocumentStore struct {
 	mu        sync.RWMutex
 	documents map[string]Document
 }
-
 
 /*
 Create a constructor that returns a pointer to a new DocumentStore :
@@ -42,7 +40,6 @@ func NewDocumentStore() *DocumentStore {
 	}
 }
 
-
 /*
 Checks if document ID already exists before creating
 Returns descriptive error if duplicate found
@@ -51,7 +48,6 @@ Maintains data integrity
 Uses sync.RWMutex to prevent race conditions
 Lock() ensures exclusive access during write operations
 defer Unlock() guarantees lock release even if function panics
-
 */
 func (s *DocumentStore) Create(doc Document) error {
 	s.mu.Lock()
@@ -63,8 +59,7 @@ func (s *DocumentStore) Create(doc Document) error {
 	return nil
 }
 
-/* 
-
+/*
 Uses RLock() instead of Lock() - allows multiple simultaneous reads
 More efficient than exclusive locks for read operations
 Multiple goroutines can read at the same time
@@ -106,16 +101,13 @@ func (s *DocumentStore) Delete(id string) error {
 }
 
 /*
-
 Uses RLock() for shared access - multiple List() calls can run simultaneously
 Doesn't block other read operations (Get, List)
 Only blocks during write operations (Create, Delete)
 
-
 make([]Document, 0, len(s.documents)) pre-allocates slice capacity
 Avoids multiple memory reallocations during append operations
 Performance optimization for large document collections
-
 */
 func (s *DocumentStore) List() []Document {
 	s.mu.RLock()
