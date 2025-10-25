@@ -12,17 +12,20 @@ help: ## Show this help message
 ########## Production Docker commands : 
 ########## ########## ########## ########## 
 
+prod-build: ## Build production image with .env.production
+	docker-compose -f docker/docker-compose.prod.yml build
+	
 prod: ## Run with nginx reverse proxy using .env.production
 	docker-compose -f docker/docker-compose.prod.yml up -d
-
-prod-stop: ## Stop production setup with nginx
-	docker-compose -f docker/docker-compose.prod.yml down
 
 prod-logs: ## Show production logs
 	docker-compose -f docker/docker-compose.prod.yml logs -f docstore-api
 
-prod-build: ## Build production image with .env.production
-	docker-compose -f docker/docker-compose.prod.yml build
+prod-stop: ## Stop production setup with nginx
+	docker-compose -f docker/docker-compose.prod.yml down
+
+
+
 ########## ########## ########## ########## 
 ########## Devlopement Docker commands : 
 ########## ########## ########## ########## 
@@ -75,12 +78,8 @@ docker-test: ## Run tests in Docker container
 swagger-dev: ## Generate swagger documentation for development environment
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh -c "cd /app/src && swag init -g main.go --output docs --instanceName dev"
 
-swagger-prod: ## Generate swagger documentation for production environment (built into image)
-	@echo "Production Swagger docs are generated during Docker build process"
-	@echo "To regenerate, rebuild the production image with: make build"
-
 swagger-prod-rebuild: ## Rebuild production image with updated Swagger docs
-	docker-compose -f docker/docker-compose.yml build --no-cache
+	docker-compose -f docker/docker-compose.prod.yml build --no-cache
 
 ########## ########## ########## ########## 
 ########## Utility commands

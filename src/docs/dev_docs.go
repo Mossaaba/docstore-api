@@ -24,7 +24,7 @@ const docTemplatedev = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
+        "/api/v1/auth/login": {
             "post": {
                 "description": "Authenticate user and return JWT token",
                 "consumes": [
@@ -76,7 +76,7 @@ const docTemplatedev = `{
                 }
             }
         },
-        "/documents": {
+        "/api/v1/documents": {
             "get": {
                 "security": [
                     {
@@ -180,7 +180,7 @@ const docTemplatedev = `{
                 }
             }
         },
-        "/documents/{id}": {
+        "/api/v1/documents/{id}": {
             "get": {
                 "security": [
                     {
@@ -427,9 +427,53 @@ const docTemplatedev = `{
                     }
                 }
             }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns the health status of the API (available at /health, not /api/v1/health)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HealthResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "controllers.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "example": "docstore-api"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "1.0.0"
+                }
+            }
+        },
         "controllers.LoginRequest": {
             "type": "object",
             "required": [
@@ -485,7 +529,7 @@ const docTemplatedev = `{
 var SwaggerInfodev = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Hornetsecurity-Document Store API",
 	Description:      "A simple document storage API with CRUD operations and JWT authentication",

@@ -38,7 +38,7 @@ func NewAuthController(cfg *config.Config) *AuthController {
 // @Success 200 {object} LoginResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /auth/login [post]
+// @Router /api/v1/auth/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

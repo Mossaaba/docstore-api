@@ -9,7 +9,7 @@
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host localhost:8080
-// @BasePath /api/v1
+// @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
@@ -45,12 +45,17 @@ func main() {
 	documentService := services.NewDocumentService(store)
 	documentController := controllers.NewDocumentController(documentService)
 	authController := controllers.NewAuthController(cfg)
+	healthController := controllers.NewHealthController(cfg)
 
 	// Setup Gin router based on environment
 	if cfg.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.Default()
+
+	// Health check endpoint (no authentication required)
+	r.GET("/health", healthController.HealthCheck)
+	log.Printf("Health check endpoint registered at: /health")
 
 	// API routes
 	v1 := r.Group("/api/v1")
