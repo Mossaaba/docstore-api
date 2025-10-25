@@ -57,6 +57,10 @@ func main() {
 	r.GET("/health", healthController.HealthCheck)
 	log.Printf("Health check endpoint registered at: /health")
 
+	// Metrics endpoint for Prometheus (no authentication required)
+	r.GET("/metrics", healthController.Metrics)
+	log.Printf("Metrics endpoint registered at: /metrics")
+
 	// API routes
 	v1 := r.Group("/api/v1")
 	{

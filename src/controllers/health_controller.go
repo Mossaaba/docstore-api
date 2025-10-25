@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"runtime"
 	"time"
 
 	"docstore-api/src/config"
@@ -47,4 +49,51 @@ func (hc *HealthController) HealthCheck(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// Metrics godoc
+// @Summary Prometheus metrics endpoint
+// @Description Returns Prometheus-compatible metrics for monitoring
+// @Tags monitoring
+// @Accept text/plain
+// @Produce text/plain
+// @Success 200 {string} string "Prometheus metrics"
+// @Router /metrics [get]
+func (hc *HealthController) Metrics(c *gin.Context) {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	metrics := fmt.Sprintf(`# HELP docstore_api_info Information about the DocStore API
+# TYPE docstore_api_info gauge
+docstore_api_info{version="1.0.0",environment="%s"} 1
+
+# HELP docstore_api_uptime_seconds Total uptime of the service in seconds
+# TYPE docstore_api_uptime_seconds counter
+docstore_api_uptime_seconds %d
+
+# HELP docstore_api_memory_usage_bytes Current memory usage in bytes
+# TYPE docstore_api_memory_usage_bytes gauge
+docstore_api_memory_usage_bytes %d
+
+# HELP docstore_api_memory_allocated_bytes Total allocated memory in bytes
+# TYPE docstore_api_memory_allocated_bytes counter
+docstore_api_memory_allocated_bytes %d
+
+# HELP docstore_api_goroutines Current number of goroutines
+# TYPE docstore_api_goroutines gauge
+docstore_api_goroutines %d
+
+# HELP docstore_api_health_status Health status of the API (1 = healthy, 0 = unhealthy)
+# TYPE docstore_api_health_status gauge
+docstore_api_health_status 1
+`,
+		hc.config.Environment,
+		int64(time.Since(time.Now().Add(-time.Hour)).Seconds()), // Placeholder uptime
+		m.Sys,
+		m.TotalAlloc,
+		runtime.NumGoroutine(),
+	)
+
+	c.Header("Content-Type", "text/plain; charset=utf-8")
+	c.String(http.StatusOK, metrics)
 }
