@@ -12,17 +12,29 @@ help: ## Show this help message
 ########## Production Docker commands : 
 ########## ########## ########## ########## 
 
+prod-build: ## Build production image with .env.production
+	docker-compose -f docker/docker-compose.prod.yml build
+	
 prod: ## Run with nginx reverse proxy using .env.production
 	docker-compose -f docker/docker-compose.prod.yml up -d
-
-prod-stop: ## Stop production setup with nginx
-	docker-compose -f docker/docker-compose.prod.yml down
 
 prod-logs: ## Show production logs
 	docker-compose -f docker/docker-compose.prod.yml logs -f docstore-api
 
-prod-build: ## Build production image with .env.production
-	docker-compose -f docker/docker-compose.prod.yml build
+prod-stop: ## Stop production setup with nginx
+	docker-compose -f docker/docker-compose.prod.yml down
+
+prod-up: ## Start production with monitoring stack
+	docker-compose -f docker/docker-compose.prod.yml up -d
+
+prod-monitoring: ## Start only monitoring services (Grafana, Prometheus, Loki)
+	docker-compose -f docker/docker-compose.prod.yml up -d grafana prometheus loki promtail
+
+prod-monitoring-logs: ## Show monitoring services logs
+	docker-compose -f docker/docker-compose.prod.yml logs -f grafana prometheus loki promtail
+
+
+
 ########## ########## ########## ########## 
 ########## Devlopement Docker commands : 
 ########## ########## ########## ########## 
@@ -75,12 +87,8 @@ docker-test: ## Run tests in Docker container
 swagger-dev: ## Generate swagger documentation for development environment
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh -c "cd /app/src && swag init -g main.go --output docs --instanceName dev"
 
-swagger-prod: ## Generate swagger documentation for production environment (built into image)
-	@echo "Production Swagger docs are generated during Docker build process"
-	@echo "To regenerate, rebuild the production image with: make build"
-
 swagger-prod-rebuild: ## Rebuild production image with updated Swagger docs
-	docker-compose -f docker/docker-compose.yml build --no-cache
+	docker-compose -f docker/docker-compose.prod.yml build --no-cache
 
 ########## ########## ########## ########## 
 ########## Utility commands
@@ -90,4 +98,15 @@ shell-dev: ## Get shell access to running container in dev
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh
 
 health: ## Check application health
-	curl -f http://localhost:8080/api/v1/documents || echo "Service is not healthy"
+	curl -f http://localhost:8080/health || echo "Service is not healthy"
+
+metrics: ## Check application metrics
+	curl -f http://localhost:8080/metrics || echo "Metrics endpoint not available"
+
+monitoring-status: ## Check status of all monitoring services
+	@echo "=== Monitoring Services Status ==="
+	@echo "Grafana (3000): $$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000 || echo 'DOWN')"
+	@echo "Prometheus (9090): $$(curl -s -o /dev/null -w '%{http_code}' http://localhost:9090 || echo 'DOWN')"
+	@echo "Loki (3100): $$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3100/ready || echo 'DOWN')"
+	@echo "API Health (8080): $$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/health || echo 'DOWN')"
+	@echo "API Metrics (8080): $$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/metrics || echo 'DOWN')"

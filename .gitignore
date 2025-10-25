@@ -35,3 +35,5 @@ src/docs/dev_swagger.json
 src/docs/dev_swagger.yaml
 src/docs/swagger.json
 src/docs/swagger.yaml
+ssl/cert.pem
+ssl/key.pem
