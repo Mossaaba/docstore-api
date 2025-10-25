@@ -8,6 +8,7 @@ A RESTful document storage API built with Go, featuring a clean layered architec
 - **Layered Architecture**: Clean separation of concerns (Models → Services → Controllers)
 - **Thread-Safe Operations**: Uses RWMutex for concurrent read/write access
 - **Full CRUD Operations**: Create, Read, Update (PUT/PATCH), Delete, and List documents
+- **Full CRUD Operations**: Create, Read, Update (PUT/PATCH), Delete, and List documents
 - **Swagger Documentation**: Auto-generated API documentation
 - **Comprehensive Testing**: Unit tests for all layers including concurrency testing
 - **Error Handling**: Proper HTTP status codes and error messages
@@ -128,6 +129,8 @@ go test -v ./...
 | GET | `/api/v1/documents/{id}` | Get document by ID |
 | PUT | `/api/v1/documents/{id}` | Update entire document |
 | PATCH | `/api/v1/documents/{id}` | Partially update document |
+| PUT | `/api/v1/documents/{id}` | Update entire document |
+| PATCH | `/api/v1/documents/{id}` | Partially update document |
 | DELETE | `/api/v1/documents/{id}` | Delete document by ID |
 
 ### Document Structure
@@ -182,6 +185,26 @@ curl -X PATCH http://localhost:8080/api/v1/documents/doc-1 \
   }'
 ```
 
+#### Update Document (PUT)
+```bash
+curl -X PUT http://localhost:8080/api/v1/documents/doc-1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "doc-1",
+    "name": "Updated Document Name",
+    "description": "Updated description"
+  }'
+```
+
+#### Partially Update Document (PATCH)
+```bash
+curl -X PATCH http://localhost:8080/api/v1/documents/doc-1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Only Update Name"
+  }'
+```
+
 #### Delete Document
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/documents/doc-1
@@ -202,6 +225,8 @@ The application follows a clean 3-layer architecture:
 
 ### **Models Layer** (`models/`)
 - **Document**: Core data structure
+- **DocumentStore**: Thread-safe in-memory storage with full CRUD operations
+- **Update Operations**: Full replacement (PUT) and partial updates (PATCH)
 - **DocumentStore**: Thread-safe in-memory storage with full CRUD operations
 - **Update Operations**: Full replacement (PUT) and partial updates (PATCH)
 - Uses `sync.RWMutex` for concurrent access control
@@ -357,4 +382,5 @@ make image-size    # Show Docker image size
 3. Add authentication and authorization
 4. Implement request validation middleware
 5. Add metrics and monitoring  
+
 
