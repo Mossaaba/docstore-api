@@ -27,7 +27,9 @@ func NewDocumentController(service services.DocumentService) *DocumentController
 // @Param document body models.Document true "Document to create"
 // @Success 201 {object} models.Document
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 409 {object} map[string]string
+// @Security BearerAuth
 // @Router /documents [post]
 func (ctrl *DocumentController) CreateDocument(c *gin.Context) {
 	var doc models.Document
@@ -52,7 +54,9 @@ func (ctrl *DocumentController) CreateDocument(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Document ID"
 // @Success 200 {object} models.Document
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /documents/{id} [get]
 func (ctrl *DocumentController) GetDocument(c *gin.Context) {
 	id := c.Param("id")
@@ -73,6 +77,8 @@ func (ctrl *DocumentController) GetDocument(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {array} models.Document
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
 // @Router /documents [get]
 func (ctrl *DocumentController) ListDocuments(c *gin.Context) {
 	docs := ctrl.service.ListDocuments()
@@ -89,7 +95,9 @@ func (ctrl *DocumentController) ListDocuments(c *gin.Context) {
 // @Param document body models.Document true "Document data to update"
 // @Success 200 {object} models.Document
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /documents/{id} [put]
 func (ctrl *DocumentController) UpdateDocument(c *gin.Context) {
 	id := c.Param("id")
@@ -120,7 +128,9 @@ func (ctrl *DocumentController) UpdateDocument(c *gin.Context) {
 // @Param updates body map[string]interface{} true "Fields to update"
 // @Success 200 {object} models.Document
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /documents/{id} [patch]
 func (ctrl *DocumentController) PartialUpdateDocument(c *gin.Context) {
 	id := c.Param("id")
@@ -149,7 +159,9 @@ func (ctrl *DocumentController) PartialUpdateDocument(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Document ID"
 // @Success 204
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /documents/{id} [delete]
 func (ctrl *DocumentController) DeleteDocument(c *gin.Context) {
 	id := c.Param("id")

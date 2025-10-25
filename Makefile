@@ -11,27 +11,18 @@ help: ## Show this help message
 ########## ########## ########## ########## 
 ########## Production Docker commands : 
 ########## ########## ########## ########## 
-build: ## Build the production Docker image
-	docker-compose -f docker/docker-compose.yml build
 
-run: ## Run the application in production mode
-	docker-compose -f docker/docker-compose.yml up -d
-
-stop: ## Stop the running containers
-	docker-compose -f docker/docker-compose.yml down
-
-clean: ## Remove containers, networks, and images
-	docker-compose -f docker/docker-compose.yml down --rmi all --volumes --remove-orphans
-
-logs: ## Show application logs
-	docker-compose -f docker/docker-compose.yml logs -f docstore-api
-
-### -->>>>>>>>>>> Production with nginx
-prod: ## Run with nginx reverse proxy
-	docker-compose -f docker/docker-compose.yml --profile production up -d
+prod: ## Run with nginx reverse proxy using .env.production
+	docker-compose -f docker/docker-compose.prod.yml up -d
 
 prod-stop: ## Stop production setup with nginx
-	docker-compose -f docker/docker-compose.yml --profile production down
+	docker-compose -f docker/docker-compose.prod.yml down
+
+prod-logs: ## Show production logs
+	docker-compose -f docker/docker-compose.prod.yml logs -f docstore-api
+
+prod-build: ## Build production image with .env.production
+	docker-compose -f docker/docker-compose.prod.yml build
 ########## ########## ########## ########## 
 ########## Devlopement Docker commands : 
 ########## ########## ########## ########## 
@@ -49,6 +40,9 @@ dev-stop: ## Stop development containers
 dev-logs: ## Show development logs
 	docker-compose -f docker/docker-compose.dev.yml logs -f docstore-api-dev
 
+########## ########## ########## ########## 
+########## Devlopement Local commands : 
+########## ########## ########## ########## 
 # Local build
 build-local: ## Build the application locally
 	go build -mod=mod -o docstore-api ./src
@@ -56,6 +50,9 @@ build-local: ## Build the application locally
 run-local: build-local ## Build and run the application locally
 	./docstore-api
 
+########## ########## ########## ########## 
+########## Testing commands : 
+########## ########## ########## ########## 
 # Testing
 test: ## Run tests locally
 	cd src && go test -v ./... -mod=mod 
@@ -72,7 +69,7 @@ docker-test: ## Run tests in Docker container
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev go test -v ./...
 
 ########## ########## ########## ########## 
-########## Utility commands
+########## Swagger
 ########## ########## ########## ########## 
 
 swagger-dev: ## Generate swagger documentation for development environment
@@ -85,17 +82,12 @@ swagger-prod: ## Generate swagger documentation for production environment (buil
 swagger-prod-rebuild: ## Rebuild production image with updated Swagger docs
 	docker-compose -f docker/docker-compose.yml build --no-cache
 
-swagger: swagger-dev ## Generate swagger documentation (defaults to dev)
+########## ########## ########## ########## 
+########## Utility commands
+########## ########## ########## ########## 
 
-shell: ## Get shell access to running container
-	docker-compose -f docker/docker-compose.yml exec docstore-api sh
+shell-dev: ## Get shell access to running container in dev
+	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh
 
 health: ## Check application health
 	curl -f http://localhost:8080/api/v1/documents || echo "Service is not healthy"
-
-# Docker image management
-image-size: ## Show Docker image size
-	docker images docstore-api
-
-prune: ## Clean up unused Docker resources
-	docker system prune -f

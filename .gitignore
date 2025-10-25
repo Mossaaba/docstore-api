@@ -24,8 +24,9 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
-.env
+# env files - ignore all environment files for maximum security
+config/.env*
+!config/.env.example
 
 # Editor/IDE
 # .idea/
