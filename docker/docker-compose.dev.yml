@@ -10,10 +10,15 @@ services:
       - GIN_MODE=debug
       - PORT=8080
       - GOFLAGS=-mod=mod
+      - APP_ENV=development
+    env_file:
+       - ../config/.env.development
     volumes:
       # Mount source code for hot reload
       - ..:/app
       - /app/vendor
+      # Mount config directory
+      - ../config:/app/config
     working_dir: /app/src
     command: go run main.go
     restart: unless-stopped
