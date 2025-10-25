@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"docstore-api/models"
-	"docstore-api/services"
+	"docstore-api/src/models"
+	"docstore-api/src/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

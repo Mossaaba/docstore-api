@@ -1,7 +1,7 @@
 package services
 
 import (
-	"docstore-api/models"
+	"docstore-api/src/models"
 )
 
 type DocumentService interface {
