@@ -12,42 +12,42 @@ help: ## Show this help message
 ########## Production Docker commands : 
 ########## ########## ########## ########## 
 build: ## Build the production Docker image
-	docker-compose build
+	docker-compose -f docker/docker-compose.yml build
 
 run: ## Run the application in production mode
-	docker-compose up -d
+	docker-compose -f docker/docker-compose.yml up -d
 
 stop: ## Stop the running containers
-	docker-compose down
+	docker-compose -f docker/docker-compose.yml down
 
 clean: ## Remove containers, networks, and images
-	docker-compose down --rmi all --volumes --remove-orphans
+	docker-compose -f docker/docker-compose.yml down --rmi all --volumes --remove-orphans
 
 logs: ## Show application logs
-	docker-compose logs -f docstore-api
+	docker-compose -f docker/docker-compose.yml logs -f docstore-api
 
 ### -->>>>>>>>>>> Production with nginx
 prod: ## Run with nginx reverse proxy
-	docker-compose --profile production up -d
+	docker-compose -f docker/docker-compose.yml --profile production up -d
 
 prod-stop: ## Stop production setup with nginx
-	docker-compose --profile production down
+	docker-compose -f docker/docker-compose.yml --profile production down
 ########## ########## ########## ########## 
 ########## Devlopement Docker commands : 
 ########## ########## ########## ########## 
 
 # Development Docker commands
 dev: ## Run the application in development mode with hot reload
-	docker-compose -f docker-compose.dev.yml up --build -d
+	docker-compose -f docker/docker-compose.dev.yml up --build -d
 	@echo "Development environment started in background"
 	@echo "Use 'make dev-logs' to view logs"
 	@echo "Use 'make dev-stop' to stop the environment"
 
 dev-stop: ## Stop development containers
-	docker-compose -f docker-compose.dev.yml down
+	docker-compose -f docker/docker-compose.dev.yml down
 
 dev-logs: ## Show development logs
-	docker-compose -f docker-compose.dev.yml logs -f docstore-api-dev
+	docker-compose -f docker/docker-compose.dev.yml logs -f docstore-api-dev
 
 # Testing
 test: ## Run tests locally
@@ -62,17 +62,17 @@ test-coverage: ## Run tests with coverage report and open in browser
 	open coverage.html
 
 docker-test: ## Run tests in Docker container
-	docker-compose -f docker-compose.dev.yml exec docstore-api-dev go test -v ./...
+	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev go test -v ./...
 
 ########## ########## ########## ########## 
 ########## Utility commands
 ########## ########## ########## ########## 
 
 swagger: ## Generate swagger documentation
-	docker-compose -f docker-compose.dev.yml exec docstore-api-dev swag init
+	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev swag init
 
 shell: ## Get shell access to running container
-	docker-compose exec docstore-api sh
+	docker-compose -f docker/docker-compose.yml exec docstore-api sh
 
 health: ## Check application health
 	curl -f http://localhost:8080/api/v1/documents || echo "Service is not healthy"

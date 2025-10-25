@@ -1,8 +1,8 @@
 services:
   docstore-api-dev:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: docker/Dockerfile.dev
     container_name: docstore-api-dev
     ports:
       - "8080:8080"
@@ -12,7 +12,7 @@ services:
       - GOFLAGS=-mod=mod
     volumes:
       # Mount source code for hot reload
-      - .:/app
+      - ..:/app
       - /app/vendor
     working_dir: /app
     command: go run main.go
