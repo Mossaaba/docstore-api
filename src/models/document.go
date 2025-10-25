@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 )
 
@@ -88,16 +89,43 @@ func (s *DocumentStore) PartialUpdate(id string, updates map[string]interface{})
 		return errors.New("document not found")
 	}
 
-	// Apply updates to existing document
-	if name, ok := updates["name"]; ok {
-		if nameStr, ok := name.(string); ok {
-			doc.Name = nameStr
+	// Use reflection to automatically detect and update attributes
+	docValue := reflect.ValueOf(&doc).Elem()
+	docType := reflect.TypeOf(doc)
+
+	for key, value := range updates {
+		// Skip ID field to prevent modification
+		if key == "id" {
+			continue
 		}
-	}
-	if description, ok := updates["description"]; ok {
-		if descStr, ok := description.(string); ok {
-			doc.Description = descStr
+
+		// Find the field by JSON tag or field name
+		fieldIndex := -1
+		for i := 0; i < docType.NumField(); i++ {
+			field := docType.Field(i)
+			jsonTag := field.Tag.Get("json")
+			
+			// Check if the key matches the JSON tag or field name
+			if jsonTag == key || field.Name == key {
+				fieldIndex = i
+				break
+			}
 		}
+
+		// If field found, update it only if types match exactly
+		if fieldIndex >= 0 {
+			field := docValue.Field(fieldIndex)
+			if field.CanSet() {
+				valueReflect := reflect.ValueOf(value)
+				
+				// Only update if the types match exactly (no conversion)
+				if valueReflect.Type() == field.Type() {
+					field.Set(valueReflect)
+				}
+				// Invalid types are silently ignored
+			}
+		}
+		// Unknown fields are silently ignored
 	}
 
 	s.documents[id] = doc
