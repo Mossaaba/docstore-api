@@ -20,10 +20,14 @@ RUN go mod verify
 # Copy source code
 COPY . .
 
-# Generate swagger docs
+# Generate swagger docs for production
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 WORKDIR /build/src
-RUN swag init
+RUN sed -e 's/@title Hornetsecurity-Document Store API/@title Hornetsecurity-Document Store API - Production/' \
+    -e 's/@description A simple document storage API with CRUD operations/@description A simple document storage API with CRUD operations - Production Environment/' \
+    main.go > main_temp.go && \
+    swag init -g main_temp.go --output docs --instanceName prod && \
+    rm main_temp.go
 
 # Build the binary with optimizations
 WORKDIR /build

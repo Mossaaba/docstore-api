@@ -75,8 +75,17 @@ docker-test: ## Run tests in Docker container
 ########## Utility commands
 ########## ########## ########## ########## 
 
-swagger: ## Generate swagger documentation
-	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev swag init
+swagger-dev: ## Generate swagger documentation for development environment
+	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh -c "cd /app/src && swag init -g main.go --output docs --instanceName dev"
+
+swagger-prod: ## Generate swagger documentation for production environment (built into image)
+	@echo "Production Swagger docs are generated during Docker build process"
+	@echo "To regenerate, rebuild the production image with: make build"
+
+swagger-prod-rebuild: ## Rebuild production image with updated Swagger docs
+	docker-compose -f docker/docker-compose.yml build --no-cache
+
+swagger: swagger-dev ## Generate swagger documentation (defaults to dev)
 
 shell: ## Get shell access to running container
 	docker-compose -f docker/docker-compose.yml exec docstore-api sh
