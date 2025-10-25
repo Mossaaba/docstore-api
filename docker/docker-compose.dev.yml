@@ -10,6 +10,7 @@ services:
       - GIN_MODE=debug
       - PORT=8080
       - GOFLAGS=-mod=mod
+      - APP_ENV=development
     volumes:
       # Mount source code for hot reload
       - ..:/app
