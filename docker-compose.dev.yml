@@ -1,0 +1,30 @@
+services:
+  docstore-api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: docstore-api-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - GIN_MODE=debug
+      - PORT=8080
+      - GOFLAGS=-mod=mod
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      - /app/vendor
+    working_dir: /app
+    command: go run main.go
+    restart: unless-stopped
+    networks:
+      - docstore-dev-network
+    # Enable debugging
+    security_opt:
+      - "apparmor:unconfined"
+    cap_add:
+      - SYS_PTRACE
+
+networks:
+  docstore-dev-network:
+    driver: bridge
