@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"bytes"
-	"docstore-api/models"
-	"docstore-api/services"
+	"docstore-api/src/models"
+	"docstore-api/src/services"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"

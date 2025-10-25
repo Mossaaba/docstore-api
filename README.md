@@ -34,9 +34,35 @@ docstore-api/
 ## Quick Start
 
 ### Prerequisites
-- Go 1.19 or higher
+- Go 1.21 or higher (for local development)
+- Docker and Docker Compose (recommended)
 
-### Installation
+### Option 1: Docker (Recommended)
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd docstore-api
+```
+
+2. Run with Docker Compose:
+```bash
+# Production mode
+make run
+# or
+docker-compose up -d
+
+# Development mode with hot reload
+make dev
+# or
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+3. Access the API:
+- **API Base URL**: http://localhost:8080/api/v1
+- **Swagger UI**: http://localhost:8080/swagger/index.html
+
+### Option 2: Local Development
 
 1. Clone the repository:
 ```bash
@@ -65,6 +91,16 @@ go run main.go
 
 ### Running Tests
 
+#### With Docker:
+```bash
+# Run tests in Docker
+make test
+
+# Run tests in production image
+make docker-test
+```
+
+#### Local Development:
 ```bash
 # Run all tests
 go test ./...
@@ -213,7 +249,7 @@ The project includes comprehensive tests for all layers:
 
 ```bash
 # Run all tests
-go test ./...
+
 
 # Run tests with coverage
 go test -cover ./...
@@ -231,6 +267,94 @@ go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
 
+## Docker Usage
+
+### Available Make Commands
+
+```bash
+make help          # Show all available commands
+make build         # Build production Docker image
+make run           # Run in production mode
+make dev           # Run in development mode with hot reload
+make stop          # Stop running containers
+make clean         # Remove containers and images
+make logs          # Show application logs
+make test          # Run tests in Docker
+make health        # Check application health
+```
+
+### Docker Features
+
+- **Multi-stage build**: Optimized production image (~10MB)
+- **Security**: Non-root user, minimal attack surface
+- **Hot reload**: Development mode with automatic restart
+- **Health checks**: Built-in container health monitoring
+- **Resource limits**: CPU and memory constraints
+- **Nginx proxy**: Optional reverse proxy for production
+- **SSL ready**: HTTPS configuration template included
+
+## Docker Usage
+
+### Common Commands
+
+```bash
+make help          # Show all available commands
+make build         # Build production Docker image
+make clean         # Remove containers, networks, images, and volumes
+make prune         # Clean up unused Docker resources
+make swagger       # Generate swagger documentation
+make health        # Check application health
+```
+
+### Development Environment
+
+```bash
+# Start development with hot reload (detached)
+make dev
+
+# View development logs
+make dev-logs
+
+# Run tests in development container
+make docker-test
+
+# Stop development environment
+make dev-stop
+
+# Run tests locally
+make test
+
+# Run tests-coverage locally
+make test-coverage
+```
+
+### Production Deployment
+
+```bash
+# Standard production deployment
+make run           # Build and run production containers
+make logs          # Show production logs
+make stop          # Stop production containers
 
 
+# Production with nginx reverse proxy
+make prod          # Run with nginx reverse proxy
+make prod-stop     # Stop nginx production setup
+
+```
+
+### Utility Commands
+
+```bash
+make shell         # Get shell access to running container
+make image-size    # Show Docker image size
+```
+
+## To Do
+
+1. Catch parameters in input rather than specify name and description
+2. Add database persistence layer
+3. Add authentication and authorization
+4. Implement request validation middleware
+5. Add metrics and monitoring  
 
