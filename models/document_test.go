@@ -25,7 +25,7 @@ func TestDocumentStore_Create(t *testing.T) {
 	store := NewDocumentStore()
 
 	doc := Document{
-		ID:          "test-1",
+		ID:          "1",
 		Name:        "Test Document",
 		Description: "A test document",
 	}
@@ -55,7 +55,7 @@ func TestDocumentStore_CreateDuplicate(t *testing.T) {
 	store := NewDocumentStore()
 
 	doc := Document{
-		ID:          "test-1",
+		ID:          "1",
 		Name:        "Test Document",
 		Description: "A test document",
 	}
@@ -82,7 +82,7 @@ func TestDocumentStore_Get(t *testing.T) {
 	store := NewDocumentStore()
 
 	doc := Document{
-		ID:          "test-1",
+		ID:          "1",
 		Name:        "Test Document",
 		Description: "A test document",
 	}
@@ -120,7 +120,7 @@ func TestDocumentStore_Delete(t *testing.T) {
 	store := NewDocumentStore()
 
 	doc := Document{
-		ID:          "test-1",
+		ID:          "1",
 		Name:        "Test Document",
 		Description: "A test document",
 	}
@@ -270,5 +270,302 @@ func TestDocumentStore_ConcurrentReadWrite(t *testing.T) {
 	docs := store.List()
 	if len(docs) < 5 {
 		t.Errorf("expected at least 5 documents, got %d", len(docs))
+	}
+}
+
+func TestDocumentStore_Update(t *testing.T) {
+	store := NewDocumentStore()
+
+	// Create initial document
+	originalDoc := Document{
+		ID:          "test-1",
+		Name:        "Original Name",
+		Description: "Original Description",
+	}
+
+	err := store.Create(originalDoc)
+	if err != nil {
+		t.Fatalf("Create() failed: %v", err)
+	}
+
+	// Test successful update
+	updatedDoc := Document{
+		ID:          "different-id", // This should be overridden by the method
+		Name:        "Updated Name",
+		Description: "Updated Description",
+	}
+
+	err = store.Update("test-1", updatedDoc)
+	if err != nil {
+		t.Errorf("Update() failed: %v", err)
+	}
+
+	// Verify document was updated
+	retrieved, err := store.Get("test-1")
+	if err != nil {
+		t.Fatalf("Get() failed after update: %v", err)
+	}
+
+	// Check that ID was preserved (overridden by method)
+	if retrieved.ID != "test-1" {
+		t.Errorf("expected ID 'test-1', got '%s'", retrieved.ID)
+	}
+
+	// Check that other fields were updated
+	if retrieved.Name != "Updated Name" {
+		t.Errorf("expected name 'Updated Name', got '%s'", retrieved.Name)
+	}
+
+	if retrieved.Description != "Updated Description" {
+		t.Errorf("expected description 'Updated Description', got '%s'", retrieved.Description)
+	}
+}
+
+func TestDocumentStore_UpdateNotFound(t *testing.T) {
+	store := NewDocumentStore()
+
+	updatedDoc := Document{
+		ID:          "non-existent",
+		Name:        "Updated Name",
+		Description: "Updated Description",
+	}
+
+	// Try to update non-existent document
+	err := store.Update("non-existent", updatedDoc)
+	if err == nil {
+		t.Error("Update() should fail for non-existent document")
+	}
+
+	expectedError := "document not found"
+	if err.Error() != expectedError {
+		t.Errorf("expected error '%s', got '%s'", expectedError, err.Error())
+	}
+}
+
+func TestDocumentStore_PartialUpdate(t *testing.T) {
+	store := NewDocumentStore()
+
+	// Create initial document
+	originalDoc := Document{
+		ID:          "test-1",
+		Name:        "Original Name",
+		Description: "Original Description",
+	}
+
+	err := store.Create(originalDoc)
+	if err != nil {
+		t.Fatalf("Create() failed: %v", err)
+	}
+
+	// Test partial update - only name
+	updates := map[string]interface{}{
+		"name": "Updated Name Only",
+	}
+
+	err = store.PartialUpdate("test-1", updates)
+	if err != nil {
+		t.Errorf("PartialUpdate() failed: %v", err)
+	}
+
+	// Verify only name was updated
+	retrieved, err := store.Get("test-1")
+	if err != nil {
+		t.Fatalf("Get() failed after partial update: %v", err)
+	}
+
+	if retrieved.Name != "Updated Name Only" {
+		t.Errorf("expected name 'Updated Name Only', got '%s'", retrieved.Name)
+	}
+
+	if retrieved.Description != "Original Description" {
+		t.Errorf("description should remain unchanged, got '%s'", retrieved.Description)
+	}
+
+	if retrieved.ID != "test-1" {
+		t.Errorf("ID should remain unchanged, got '%s'", retrieved.ID)
+	}
+}
+
+func TestDocumentStore_PartialUpdateDescription(t *testing.T) {
+	store := NewDocumentStore()
+
+	// Create initial document
+	originalDoc := Document{
+		ID:          "test-1",
+		Name:        "Original Name",
+		Description: "Original Description",
+	}
+
+	err := store.Create(originalDoc)
+	if err != nil {
+		t.Fatalf("Create() failed: %v", err)
+	}
+
+	// Test partial update - only description
+	updates := map[string]interface{}{
+		"description": "Updated Description Only",
+	}
+
+	err = store.PartialUpdate("test-1", updates)
+	if err != nil {
+		t.Errorf("PartialUpdate() failed: %v", err)
+	}
+
+	// Verify only description was updated
+	retrieved, err := store.Get("test-1")
+	if err != nil {
+		t.Fatalf("Get() failed after partial update: %v", err)
+	}
+
+	if retrieved.Description != "Updated Description Only" {
+		t.Errorf("expected description 'Updated Description Only', got '%s'", retrieved.Description)
+	}
+
+	if retrieved.Name != "Original Name" {
+		t.Errorf("name should remain unchanged, got '%s'", retrieved.Name)
+	}
+
+	if retrieved.ID != "test-1" {
+		t.Errorf("ID should remain unchanged, got '%s'", retrieved.ID)
+	}
+}
+
+func TestDocumentStore_PartialUpdateBothFields(t *testing.T) {
+	store := NewDocumentStore()
+
+	// Create initial document
+	originalDoc := Document{
+		ID:          "test-1",
+		Name:        "Original Name",
+		Description: "Original Description",
+	}
+
+	err := store.Create(originalDoc)
+	if err != nil {
+		t.Fatalf("Create() failed: %v", err)
+	}
+
+	// Test partial update - both fields
+	updates := map[string]interface{}{
+		"name":        "Updated Name",
+		"description": "Updated Description",
+	}
+
+	err = store.PartialUpdate("test-1", updates)
+	if err != nil {
+		t.Errorf("PartialUpdate() failed: %v", err)
+	}
+
+	// Verify both fields were updated
+	retrieved, err := store.Get("test-1")
+	if err != nil {
+		t.Fatalf("Get() failed after partial update: %v", err)
+	}
+
+	if retrieved.Name != "Updated Name" {
+		t.Errorf("expected name 'Updated Name', got '%s'", retrieved.Name)
+	}
+
+	if retrieved.Description != "Updated Description" {
+		t.Errorf("expected description 'Updated Description', got '%s'", retrieved.Description)
+	}
+
+	if retrieved.ID != "test-1" {
+		t.Errorf("ID should remain unchanged, got '%s'", retrieved.ID)
+	}
+}
+
+func TestDocumentStore_PartialUpdateInvalidTypes(t *testing.T) {
+	store := NewDocumentStore()
+
+	// Create initial document
+	originalDoc := Document{
+		ID:          "test-1",
+		Name:        "Original Name",
+		Description: "Original Description",
+	}
+
+	err := store.Create(originalDoc)
+	if err != nil {
+		t.Fatalf("Create() failed: %v", err)
+	}
+
+	// Test partial update with invalid types (should be ignored)
+	updates := map[string]interface{}{
+		"name":        123,     // Invalid type - should be ignored
+		"description": true,    // Invalid type - should be ignored
+		"invalid":     "field", // Unknown field - should be ignored
+	}
+
+	err = store.PartialUpdate("test-1", updates)
+	if err != nil {
+		t.Errorf("PartialUpdate() failed: %v", err)
+	}
+
+	// Verify document remains unchanged
+	retrieved, err := store.Get("test-1")
+	if err != nil {
+		t.Fatalf("Get() failed after partial update: %v", err)
+	}
+
+	if retrieved.Name != "Original Name" {
+		t.Errorf("name should remain unchanged, got '%s'", retrieved.Name)
+	}
+
+	if retrieved.Description != "Original Description" {
+		t.Errorf("description should remain unchanged, got '%s'", retrieved.Description)
+	}
+}
+
+func TestDocumentStore_PartialUpdateNotFound(t *testing.T) {
+	store := NewDocumentStore()
+
+	updates := map[string]interface{}{
+		"name": "Updated Name",
+	}
+
+	// Try to partial update non-existent document
+	err := store.PartialUpdate("non-existent", updates)
+	if err == nil {
+		t.Error("PartialUpdate() should fail for non-existent document")
+	}
+
+	expectedError := "document not found"
+	if err.Error() != expectedError {
+		t.Errorf("expected error '%s', got '%s'", expectedError, err.Error())
+	}
+}
+
+func TestDocumentStore_PartialUpdateEmptyUpdates(t *testing.T) {
+	store := NewDocumentStore()
+
+	// Create initial document
+	originalDoc := Document{
+		ID:          "test-1",
+		Name:        "Original Name",
+		Description: "Original Description",
+	}
+
+	err := store.Create(originalDoc)
+	if err != nil {
+		t.Fatalf("Create() failed: %v", err)
+	}
+
+	// Test partial update with empty updates map
+	updates := map[string]interface{}{}
+
+	err = store.PartialUpdate("test-1", updates)
+	if err != nil {
+		t.Errorf("PartialUpdate() failed: %v", err)
+	}
+
+	// Verify document remains unchanged
+	retrieved, err := store.Get("test-1")
+	if err != nil {
+		t.Fatalf("Get() failed after partial update: %v", err)
+	}
+
+	if retrieved != originalDoc {
+		t.Errorf("document should remain unchanged, got %+v, want %+v", retrieved, originalDoc)
 	}
 }
