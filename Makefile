@@ -49,13 +49,20 @@ dev-stop: ## Stop development containers
 dev-logs: ## Show development logs
 	docker-compose -f docker/docker-compose.dev.yml logs -f docstore-api-dev
 
+# Local build
+build-local: ## Build the application locally
+	go build -mod=mod -o docstore-api ./src
+
+run-local: build-local ## Build and run the application locally
+	./docstore-api
+
 # Testing
 test: ## Run tests locally
-	go test -v ./... -mod=mod 
+	cd src && go test -v ./... -mod=mod 
 
 test-coverage: ## Run tests with coverage report and open in browser
-	GOFLAGS="-mod=mod" go test -cover ./...
-	GOFLAGS="-mod=mod" go test -coverprofile=coverage.out ./...
+	cd src && GOFLAGS="-mod=mod" go test -cover ./...
+	cd src && GOFLAGS="-mod=mod" go test -coverprofile=../coverage.out ./...
 	GOFLAGS="-mod=mod" go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 	@echo "Opening coverage report in browser..."

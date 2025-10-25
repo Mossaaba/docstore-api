@@ -22,13 +22,15 @@ COPY . .
 
 # Generate swagger docs
 RUN go install github.com/swaggo/swag/cmd/swag@latest
+WORKDIR /build/src
 RUN swag init
 
 # Build the binary with optimizations
+WORKDIR /build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
-    -o app .
+    -o app ./src
 
 # Final stage - minimal image
 FROM scratch
