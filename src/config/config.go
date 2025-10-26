@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -73,7 +74,17 @@ func loadEnvFileFromPaths(filename string, paths []string) {
 
 // loadEnvFile loads environment variables from a file and returns true if successful
 func loadEnvFile(filename string) bool {
-	file, err := os.Open(filename)
+	// Clean the file path to prevent directory traversal
+	cleanPath := filepath.Clean(filename)
+
+	// Only block paths that try to escape the working directory root
+	// Allow relative paths like ../config/.env but block things like ../../etc/passwd
+	if strings.Contains(cleanPath, "../..") {
+		log.Printf("Invalid file path detected (too many parent directories): %s", filename)
+		return false
+	}
+
+	file, err := os.Open(cleanPath)
 	if err != nil {
 		// File doesn't exist, return false to try next path
 		return false
@@ -103,7 +114,10 @@ func loadEnvFile(filename string) bool {
 
 		// Only set if not already set in environment (ENV vars have highest priority)
 		if os.Getenv(key) == "" {
-			os.Setenv(key, value)
+			if err := os.Setenv(key, value); err != nil {
+				log.Printf("Failed to set environment variable %s: %v", key, err)
+				continue
+			}
 			loadedCount++
 		} else {
 			log.Printf("  - %s: using environment variable (overriding file)", key)

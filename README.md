@@ -453,6 +453,7 @@ cp config/.env.production config/.env.production
 # Update JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD with secure values
 
 make prod-build    # Build with production environment
+make prod-up:      ## Start production with monitoring stack
 make prod          # Run with nginx reverse proxy using .env.production
 make prod-logs     # Show production logs
 make prod-stop     # Stop production setup
@@ -505,10 +506,15 @@ make image-size    # Show Docker image size
 3. ✅ ~~Add authentication and authorization (for swagger)~~
 5. ✅Add metrics and monitoring with grafana
 8. ✅ Add security headers in swagger + indicate prod/dev environment
+9. ✅ Install pre-commit
 
+```sh
+pre-commit install
+pre-commit run --all-files
+```
 6. Update the documentation (Setup / Git Instruction / Schema / manipulation )
 7. GitHub action (Build and push docker / run test with coverage / generate release )
-9. Install pre-commit
+
 10. Check security
 11. Check all stuff
 12. Zip the code

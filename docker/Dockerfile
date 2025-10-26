@@ -36,19 +36,26 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -a -installsuffix cgo \
     -o app ./src
 
-# Final stage - minimal image
-FROM scratch
+# Final stage - minimal image with basic filesystem
+FROM alpine:latest
 
-# Import from builder
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=builder /etc/passwd /etc/passwd
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates tzdata
+
+# Create appuser for security
+RUN adduser -D -g '' appuser
+
+# Create necessary directories
+RUN mkdir -p /home/appuser && chown appuser:appuser /home/appuser
 
 # Copy the binary
 COPY --from=builder /build/app /app
 
 # Use non-root user
 USER appuser
+
+# Set HOME directory
+ENV HOME=/home/appuser
 
 # Expose port
 EXPOSE 8080

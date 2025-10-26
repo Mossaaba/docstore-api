@@ -20,7 +20,6 @@ repos:
         name: go vet
         entry: go vet
         language: system
-        files: \.go$
         pass_filenames: false
         args: [./...]
 
@@ -28,6 +27,19 @@ repos:
         name: go test
         entry: go test
         language: system
-        files: \.go$
+        pass_filenames: false
+        args: [./...]
+
+      - id: gosec
+        name: gosec security scan
+        entry: gosec
+        language: system
+        pass_filenames: false
+        args: [./...]
+
+      - id: govulncheck
+        name: govulncheck
+        entry: govulncheck
+        language: system
         pass_filenames: false
         args: [./...]
