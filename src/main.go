@@ -26,6 +26,7 @@ import (
 	"docstore-api/src/models"
 	"docstore-api/src/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -50,6 +51,43 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.Default()
+
+	// Configure CORS middleware if enabled
+	if cfg.EnableCORS {
+		corsConfig := cors.DefaultConfig()
+
+		// Use custom origins if provided, otherwise use defaults
+		if len(cfg.CORSOrigins) > 0 {
+			corsConfig.AllowOrigins = cfg.CORSOrigins
+			log.Printf("CORS middleware enabled with custom origins: %v", cfg.CORSOrigins)
+		} else if cfg.Environment == "production" {
+			// Production: Allow common origins until domain is configured
+			// TODO: Update with your production domain when available
+			corsConfig.AllowOrigins = []string{
+				"https://localhost",
+				"https://127.0.0.1",
+				"http://localhost:8080",
+				"https://localhost:8080",
+			}
+			log.Printf("CORS middleware enabled for production with default origins (update CORS_ORIGINS when domain is ready)")
+		} else {
+			// Development: Allow localhost for Swagger UI
+			corsConfig.AllowOrigins = []string{
+				"http://localhost:8080",
+				"https://localhost:8080",
+				"http://127.0.0.1:8080",
+				"https://127.0.0.1:8080",
+			}
+			log.Printf("CORS middleware enabled for development")
+		}
+
+		corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+		corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+		corsConfig.AllowCredentials = true
+		r.Use(cors.New(corsConfig))
+	} else {
+		log.Printf("CORS middleware disabled")
+	}
 
 	// Health check endpoint (no authentication required)
 	r.GET("/health", healthController.HealthCheck)
@@ -110,10 +148,21 @@ func main() {
 		}
 	}
 
-	log.Printf("Server starting on :%s", cfg.ServerPort)
-	log.Printf("Swagger UI available at: http://localhost:%s/swagger/index.html", cfg.ServerPort)
+	// Start server with HTTPS or HTTP based on configuration
+	if cfg.EnableHTTPS {
+		log.Printf("Starting HTTPS server on :%s", cfg.ServerPort)
+		log.Printf("Using cert file: %s, key file: %s", cfg.CertFile, cfg.KeyFile)
+		log.Printf("Swagger UI available at: https://localhost:%s/swagger/index.html", cfg.ServerPort)
 
-	if err := r.Run(":" + cfg.ServerPort); err != nil {
-		log.Fatal("Failed to start server:", err)
+		if err := r.RunTLS(":"+cfg.ServerPort, cfg.CertFile, cfg.KeyFile); err != nil {
+			log.Fatal("Failed to start HTTPS server:", err)
+		}
+	} else {
+		log.Printf("Starting HTTP server on :%s", cfg.ServerPort)
+		log.Printf("Swagger UI available at: http://localhost:%s/swagger/index.html", cfg.ServerPort)
+
+		if err := r.Run(":" + cfg.ServerPort); err != nil {
+			log.Fatal("Failed to start HTTP server:", err)
+		}
 	}
 }

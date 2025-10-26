@@ -54,6 +54,14 @@ COPY --from=builder /build/app /app
 # Copy config directory for environment file loading
 COPY --from=builder /build/config /config
 
+# Copy SSL certificates for HTTPS support
+COPY --from=builder /build/ssl /ssl
+
+# Fix SSL certificate permissions for appuser
+RUN chown -R appuser:appuser /ssl && \
+    chmod 644 /ssl/cert.pem && \
+    chmod 600 /ssl/key.pem
+
 # Use non-root user
 USER appuser
 

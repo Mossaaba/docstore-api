@@ -15,6 +15,11 @@ type Config struct {
 	AdminPass   string
 	ServerPort  string
 	Environment string
+	EnableCORS  bool
+	CORSOrigins []string
+	EnableHTTPS bool
+	CertFile    string
+	KeyFile     string
 }
 
 // LoadConfig loads configuration from environment variables and .env files
@@ -38,12 +43,27 @@ func LoadConfig() *Config {
 		"../config/.env", // From src/ directory
 	})
 
+	// Parse CORS origins from environment variable (comma-separated)
+	corsOriginsStr := getEnv("CORS_ORIGINS", "")
+	var corsOrigins []string
+	if corsOriginsStr != "" {
+		corsOrigins = strings.Split(corsOriginsStr, ",")
+		for i, origin := range corsOrigins {
+			corsOrigins[i] = strings.TrimSpace(origin)
+		}
+	}
+
 	config := &Config{
 		JWTSecret:   getRequiredEnv("JWT_SECRET"),
 		AdminUser:   getEnv("ADMIN_USERNAME", "admin"),
 		AdminPass:   getRequiredEnv("ADMIN_PASSWORD"),
 		ServerPort:  getEnv("SERVER_PORT", "8080"),
 		Environment: env,
+		EnableCORS:  getEnv("ENABLE_CORS", "true") == "true",
+		CORSOrigins: corsOrigins,
+		EnableHTTPS: getEnv("ENABLE_HTTPS", "false") == "true",
+		CertFile:    getEnv("CERT_FILE", "ssl/cert.pem"),
+		KeyFile:     getEnv("KEY_FILE", "ssl/key.pem"),
 	}
 
 	// Log configuration source (without sensitive data)
