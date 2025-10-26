@@ -244,10 +244,6 @@ func TestGetRequiredEnv(t *testing.T) {
 		}
 	})
 
-	// Note: We can't easily test the fatal case in a unit test
-	// as it would terminate the test process. In a real scenario,
-	// you might want to refactor getRequiredEnv to return an error
-	// instead of calling log.Fatalf for better testability.
 }
 
 func TestLoadEnvFileFromPaths(t *testing.T) {
