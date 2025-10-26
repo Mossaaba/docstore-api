@@ -1,6 +1,6 @@
 # Document Store API
 
-A RESTful document storage API built with Go, featuring a clean layered architecture and comprehensive testing. This project demonstrates CRUD operations with proper concurrency control, HTTP endpoints, Swagger documentation, and monitoring stack using Grafana + Prometheus + Loki.
+A RESTful document storage API built with Go, featuring a clean layered architecture and comprehensive testing. This project demonstrates CRUD operations with proper concurrency control, HTTP / HTTPS endpoints, Swagger documentation, and monitoring stack using Grafana + Prometheus + Loki.
 
 ## Features
 
@@ -41,14 +41,8 @@ The application follows a clean 3-layer architecture:
 - Token parsing and validation
 - Authorization header processing
 
-### Data Flow
-```
-HTTP Request → Controller → Service → Model → Storage
-HTTP Response ← Controller ← Service ← Model ← Storage
-```
 
 ## Testing
-
 The project includes comprehensive tests for all layers:
 
 ### **Models Layer Tests** (`models/document_test.go`)
@@ -164,16 +158,16 @@ go tool cover -html=coverage.out
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "admin",
-    "password": "password"
+    "username": "$ADMIN_USERNAME",
+    "password": "$ADMIN_PASSWORD"
   }'
 ```
 
 Response:
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": "admin"
+  "token": "$JWT_TOKEN",
+  "user": "$ADMIN_PASSWORD"
 }
 ```
 
@@ -269,14 +263,6 @@ curl -X DELETE http://localhost:8080/api/v1/documents/doc-1 \
 }
 ```
 
-### Authentication
-
-The API uses JWT (JSON Web Tokens) for authentication. All document endpoints require a valid JWT token.
-
-#### Configuration
-
-The API uses environment variables for configuration with support for multiple environments:
-
 
 ## Environment Configuration
 
@@ -305,16 +291,6 @@ The configuration system loads files in this order:
 3. **General Environment File** (fallback)
    - `environments/.env` (for local overrides)
 
-**Example**: In development (`APP_ENV=development`):
-- Loads `environments/.env.development` first
-- Then `environments/.env` as fallback
-- Environment variables override everything
-
-### Default Credentials (configurable via environments/.env)
-- **Username**: `admin` (set via `ADMIN_USERNAME`)
-- **Password**: `password` (set via `ADMIN_PASSWORD`)
-- **JWT Secret**: Configurable via `JWT_SECRET`
-
 
 
 ## Docker Usage
@@ -333,18 +309,9 @@ The configuration system loads files in this order:
 
 ```bash
 make help          # Show all available commands
-make build         # Build production Docker image
-make clean         # Remove containers, networks, images, and volumes
-make prune         # Clean up unused Docker resources
-make health        # Check application health
 ```
 
 ### Development Commands
-
-When running `make dev`, the application uses:
-- **Primary**: `config/.env.development` (because `APP_ENV=development`)
-- **Fallback**: `config/.env` (if it exists)
-- **Default values**: Built-in defaults
 
 ```bash
 make dev           # Start development with hot reload (detached)
@@ -365,19 +332,13 @@ make prod-logs     # Show production logs
 make prod-stop     # Stop production setup
 ```
 
-#### Production Security Checklist
-- [ ] Update `JWT_SECRET` in `config/.env.production` with a strong random key
-- [ ] Change `ADMIN_USERNAME` and `ADMIN_PASSWORD` to secure values
-- [ ] Ensure `config/.env.production` is not committed to version control
-- [ ] Set up proper SSL certificates for HTTPS
-- [ ] Configure firewall rules for production deployment
-
 ### Utility Commands
 
 ```bash
 make shell-dev     # Get shell access to running container
-make health        # Get health check of the application
-make metrics       # Get metrics of the application
+make health        # Get health check of the application --> if http
+make metrics       # Get metrics of the application --> if http
+make precommit-run # Run pre-commit
 ```
 
 ## Security
@@ -388,15 +349,6 @@ make metrics       # Get metrics of the application
 - **Header Format**: `Authorization: Bearer <token>`
 - **Secret Key**: Configurable via environment variable (defaults to demo key)
 
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `JWT_SECRET` | Secret key for JWT signing | `your-secret-key-change-in-production` |
-| `ADMIN_USERNAME` | Admin username | `admin` |
-| `ADMIN_PASSWORD` | Admin password | `password` |
-| `SERVER_PORT` | Server port | `8080` |
-| `APP_ENV` | Environment (development/production) | `development` |
 
 ### Production Security Notes
 - **Always** change the JWT secret key in production
@@ -405,9 +357,3 @@ make metrics       # Get metrics of the application
 - Consider implementing refresh tokens for better security
 - Add rate limiting for authentication endpoints
 - Never commit `.env` files to version control
-
-## To Do
-
-- GitHub Actions (Build and push Docker / run tests with coverage / generate release)
-- Final code review and validation
-- Code packaging and distribution
