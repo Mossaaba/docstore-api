@@ -15,18 +15,13 @@ scrape_configs:
   # DocStore API metrics endpoint
   - job_name: 'docstore-api'
     static_configs:
-      - targets: ['docstore-api:8080']
+      - targets: ['docstore-api-prod:8080']
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
 
-  # DocStore API health endpoint
-  - job_name: 'docstore-api-health'
-    static_configs:
-      - targets: ['docstore-api:8080']
-    metrics_path: '/health'
-    scrape_interval: 30s
-    scrape_timeout: 10s
+  # DocStore API health endpoint (removed - health checks should not be scraped as metrics)
+  # Use /metrics endpoint for Prometheus metrics instead
 
   # Docker daemon metrics (if enabled)
   - job_name: 'docker'

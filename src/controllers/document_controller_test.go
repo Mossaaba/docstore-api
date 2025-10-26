@@ -47,10 +47,10 @@ func TestDocumentController_CreateDocument(t *testing.T) {
 	t.Run("Invalid JSON", func(t *testing.T) {
 		req, _ := http.NewRequest("POST", "/documents", bytes.NewBuffer([]byte("invalid json")))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 
@@ -60,16 +60,16 @@ func TestDocumentController_CreateDocument(t *testing.T) {
 			Name:        "Duplicate Test",
 			Description: "Test Description",
 		}
-		
+
 		jsonData, _ := json.Marshal(doc)
-		
+
 		// Create first document
 		req1, _ := http.NewRequest("POST", "/documents", bytes.NewBuffer(jsonData))
 		req1.Header.Set("Content-Type", "application/json")
 		w1 := httptest.NewRecorder()
 		router.ServeHTTP(w1, req1)
 		assert.Equal(t, http.StatusCreated, w1.Code)
-		
+
 		// Try to create duplicate
 		req2, _ := http.NewRequest("POST", "/documents", bytes.NewBuffer(jsonData))
 		req2.Header.Set("Content-Type", "application/json")
@@ -99,9 +99,9 @@ func TestDocumentController_GetDocument(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/documents/get-test-1", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -113,7 +113,7 @@ func TestDocumentController_GetDocument(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/documents/non-existent", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 }
@@ -126,9 +126,9 @@ func TestDocumentController_ListDocuments(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/documents", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response []models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -141,7 +141,7 @@ func TestDocumentController_ListDocuments(t *testing.T) {
 			{ID: "list-1", Name: "Doc 1", Description: "First doc"},
 			{ID: "list-2", Name: "Doc 2", Description: "Second doc"},
 		}
-		
+
 		for _, doc := range docs {
 			jsonData, _ := json.Marshal(doc)
 			createReq, _ := http.NewRequest("POST", "/documents", bytes.NewBuffer(jsonData))
@@ -149,13 +149,13 @@ func TestDocumentController_ListDocuments(t *testing.T) {
 			createW := httptest.NewRecorder()
 			router.ServeHTTP(createW, createReq)
 		}
-		
+
 		req, _ := http.NewRequest("GET", "/documents", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response []models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -185,16 +185,16 @@ func TestDocumentController_UpdateDocument(t *testing.T) {
 			Name:        "Updated Name",
 			Description: "Updated Description",
 		}
-		
+
 		jsonData, _ := json.Marshal(updatedDoc)
 		req, _ := http.NewRequest("PUT", "/documents/update-test-1", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -208,24 +208,24 @@ func TestDocumentController_UpdateDocument(t *testing.T) {
 			Name:        "Test",
 			Description: "Test",
 		}
-		
+
 		jsonData, _ := json.Marshal(doc)
 		req, _ := http.NewRequest("PUT", "/documents/non-existent", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 
 	t.Run("Invalid JSON", func(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "/documents/update-test-1", bytes.NewBuffer([]byte("invalid json")))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 }
@@ -250,16 +250,16 @@ func TestDocumentController_PartialUpdateDocument(t *testing.T) {
 		updates := map[string]interface{}{
 			"name": "Updated Name Only",
 		}
-		
+
 		jsonData, _ := json.Marshal(updates)
 		req, _ := http.NewRequest("PATCH", "/documents/patch-test-1", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -271,16 +271,16 @@ func TestDocumentController_PartialUpdateDocument(t *testing.T) {
 		updates := map[string]interface{}{
 			"description": "Updated Description Only",
 		}
-		
+
 		jsonData, _ := json.Marshal(updates)
 		req, _ := http.NewRequest("PATCH", "/documents/patch-test-1", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -293,16 +293,16 @@ func TestDocumentController_PartialUpdateDocument(t *testing.T) {
 			"name":        "Both Updated Name",
 			"description": "Both Updated Description",
 		}
-		
+
 		jsonData, _ := json.Marshal(updates)
 		req, _ := http.NewRequest("PATCH", "/documents/patch-test-1", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.Document
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -314,24 +314,24 @@ func TestDocumentController_PartialUpdateDocument(t *testing.T) {
 		updates := map[string]interface{}{
 			"name": "Test",
 		}
-		
+
 		jsonData, _ := json.Marshal(updates)
 		req, _ := http.NewRequest("PATCH", "/documents/non-existent", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 
 	t.Run("Invalid JSON", func(t *testing.T) {
 		req, _ := http.NewRequest("PATCH", "/documents/patch-test-1", bytes.NewBuffer([]byte("invalid json")))
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 }
@@ -357,9 +357,9 @@ func TestDocumentController_DeleteDocument(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/documents/delete-test-1", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusNoContent, w.Code)
-		
+
 		// Verify document is deleted by trying to get it
 		getReq, _ := http.NewRequest("GET", "/documents/delete-test-1", nil)
 		getW := httptest.NewRecorder()
@@ -371,7 +371,7 @@ func TestDocumentController_DeleteDocument(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/documents/non-existent", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		
+
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 }
