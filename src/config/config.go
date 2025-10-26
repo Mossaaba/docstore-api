@@ -33,14 +33,14 @@ func LoadConfig() *Config {
 	envFile := fmt.Sprintf(".env.%s", env)
 	// Try multiple possible paths
 	loadEnvFileFromPaths(envFile, []string{
-		fmt.Sprintf("config/.env.%s", env),    // From project root
-		fmt.Sprintf("../config/.env.%s", env), // From src/ directory
+		fmt.Sprintf("environments/.env.%s", env),    // From project root
+		fmt.Sprintf("../environments/.env.%s", env), // From src/ directory
 	})
 
 	// Load general .env file as fallback (lower priority)
 	loadEnvFileFromPaths(".env", []string{
-		"config/.env",    // From project root
-		"../config/.env", // From src/ directory
+		"environments/.env",    // From project root
+		"../environments/.env", // From src/ directory
 	})
 
 	// Parse CORS origins from environment variable (comma-separated)
@@ -98,7 +98,7 @@ func loadEnvFile(filename string) bool {
 	cleanPath := filepath.Clean(filename)
 
 	// Only block paths that try to escape the working directory root
-	// Allow relative paths like ../config/.env but block things like ../../etc/passwd
+	// Allow relative paths like ../environments/.env but block things like ../../etc/passwd
 	if strings.Contains(cleanPath, "../..") {
 		log.Printf("Invalid file path detected (too many parent directories): %s", filename)
 		return false
