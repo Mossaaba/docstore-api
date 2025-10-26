@@ -1,6 +1,6 @@
 # Docker commands for the Document Store API
 
-.PHONY: help build run stop clean dev test  docker-test logs
+.PHONY: help build run stop dev test  docker-test logs
 
 # Default target
 help: ## Show this help message
@@ -32,7 +32,6 @@ prod-monitoring: ## Start only monitoring services (Grafana, Prometheus, Loki)
 
 prod-monitoring-logs: ## Show monitoring services logs
 	docker-compose -f docker/compose.prod.yml logs -f grafana prometheus loki promtail
-
 
 
 ########## ########## ########## ##########
@@ -113,7 +112,7 @@ precommit-update: ## Update pre-commit hooks to latest versions
 shell-dev: ## Get shell access to running container in dev
 	docker-compose -f docker/compose.dev.yml exec docstore-api-dev sh
 
-health: ## Check application health
+health: ## Check application health --> if not https
 	curl -f http://localhost:8080/health || echo "Service is not healthy"
 
 metrics: ## Check application metrics
