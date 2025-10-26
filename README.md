@@ -1,6 +1,6 @@
 # Document Store API
 
-A RESTful document storage API built with Go, featuring a clean layered architecture and comprehensive testing. This project demonstrates CRUD operations with proper concurrency control, HTTP endpoints, and Swagger documentation.
+A RESTful document storage API built with Go, featuring a clean layered architecture and comprehensive testing. This project demonstrates CRUD operations with proper concurrency control, HTTP endpoints, and Swagger documentation and monitoring stack using : Grafana + promethus + Loki.
 
 ## Features
 
@@ -12,6 +12,7 @@ A RESTful document storage API built with Go, featuring a clean layered architec
 - **Swagger Documentation**: Auto-generated API documentation with JWT security
 - **Comprehensive Testing**: Unit tests for all layers including concurrency testing
 - **Error Handling**: Proper HTTP status codes and error messages
+- **Monitroing tools**: Enbaling metric, health check and log collection.
 
 ## Project Structure
 
@@ -92,6 +93,11 @@ swag init
 4. Run the API server:
 ```bash
 go run main.go
+
+# Use precommit to enhace the code quality
+
+pre-commit install
+pre-commit run --all-files
 ```
 
 5. Access the API:
@@ -507,14 +513,11 @@ make image-size    # Show Docker image size
 5. ✅Add metrics and monitoring with grafana
 8. ✅ Add security headers in swagger + indicate prod/dev environment
 9. ✅ Install pre-commit
+10. ✅ Check security
 
-```sh
-pre-commit install
-pre-commit run --all-files
-```
 6. Update the documentation (Setup / Git Instruction / Schema / manipulation )
 7. GitHub action (Build and push docker / run test with coverage / generate release )
 
-10. Check security
+
 11. Check all stuff
 12. Zip the code

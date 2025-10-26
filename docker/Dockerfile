@@ -51,6 +51,9 @@ RUN mkdir -p /home/appuser && chown appuser:appuser /home/appuser
 # Copy the binary
 COPY --from=builder /build/app /app
 
+# Copy config directory for environment file loading
+COPY --from=builder /build/config /config
+
 # Use non-root user
 USER appuser
 

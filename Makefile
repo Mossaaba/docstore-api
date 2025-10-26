@@ -60,7 +60,10 @@ build-local: ## Build the application locally
 	go build -mod=mod -o docstore-api ./src
 
 run-local: build-local ## Build and run the application locally
-	./docstore-api
+	APP_ENV=development ./docstore-api
+
+run-local-prod: build-local ## Build and run the application locally in production mode
+	APP_ENV=production ./docstore-api
 
 ########## ########## ########## ##########
 ########## Testing commands :
