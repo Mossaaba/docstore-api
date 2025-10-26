@@ -341,6 +341,11 @@ make health        # Check application health
 
 ### Development Commands
 
+When running `make dev`, the application uses:
+- **Primary**: `config/.env.development` (because `APP_ENV=development`)
+- **Fallback**: `config/.env` (if it exists)
+- **Default values**: Built-in defaults
+
 ```bash
 make dev           # Start development with hot reload (detached)
 make swagger-dev   # Generate swagger documentation for dev
@@ -359,6 +364,13 @@ make prod-up       # Start production with monitoring stack
 make prod-logs     # Show production logs
 make prod-stop     # Stop production setup
 ```
+
+#### Production Security Checklist
+- [ ] Update `JWT_SECRET` in `config/.env.production` with a strong random key
+- [ ] Change `ADMIN_USERNAME` and `ADMIN_PASSWORD` to secure values
+- [ ] Ensure `config/.env.production` is not committed to version control
+- [ ] Set up proper SSL certificates for HTTPS
+- [ ] Configure firewall rules for production deployment
 
 ### Utility Commands
 
