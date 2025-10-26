@@ -124,7 +124,8 @@ services:
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/provisioning/datasources/datasources.prod.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     restart: unless-stopped
     networks:

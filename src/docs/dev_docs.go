@@ -450,12 +450,39 @@ const docTemplatedev = `{
                     }
                 }
             }
+        },
+        "/metrics": {
+            "get": {
+                "description": "Returns Prometheus-compatible metrics for monitoring",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Prometheus metrics endpoint",
+                "responses": {
+                    "200": {
+                        "description": "Prometheus metrics",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "controllers.HealthResponse": {
             "type": "object",
             "properties": {
+                "environment": {
+                    "type": "string",
+                    "example": "development"
+                },
                 "service": {
                     "type": "string",
                     "example": "docstore-api"

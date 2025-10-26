@@ -104,7 +104,7 @@ func (s *DocumentStore) PartialUpdate(id string, updates map[string]interface{})
 		for i := 0; i < docType.NumField(); i++ {
 			field := docType.Field(i)
 			jsonTag := field.Tag.Get("json")
-			
+
 			// Check if the key matches the JSON tag or field name
 			if jsonTag == key || field.Name == key {
 				fieldIndex = i
@@ -117,7 +117,7 @@ func (s *DocumentStore) PartialUpdate(id string, updates map[string]interface{})
 			field := docValue.Field(fieldIndex)
 			if field.CanSet() {
 				valueReflect := reflect.ValueOf(value)
-				
+
 				// Only update if the types match exactly (no conversion)
 				if valueReflect.Type() == field.Type() {
 					field.Set(valueReflect)

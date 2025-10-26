@@ -8,13 +8,13 @@ help: ## Show this help message
 	@echo ''
 	@echo 'Targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-########## ########## ########## ########## 
-########## Production Docker commands : 
-########## ########## ########## ########## 
+########## ########## ########## ##########
+########## Production Docker commands :
+########## ########## ########## ##########
 
 prod-build: ## Build production image with .env.production
 	docker-compose -f docker/docker-compose.prod.yml build
-	
+
 prod: ## Run with nginx reverse proxy using .env.production
 	docker-compose -f docker/docker-compose.prod.yml up -d
 
@@ -35,9 +35,9 @@ prod-monitoring-logs: ## Show monitoring services logs
 
 
 
-########## ########## ########## ########## 
-########## Devlopement Docker commands : 
-########## ########## ########## ########## 
+########## ########## ########## ##########
+########## Devlopement Docker commands :
+########## ########## ########## ##########
 
 # Development Docker commands
 dev: ## Run the application in development mode with hot reload
@@ -52,22 +52,25 @@ dev-stop: ## Stop development containers
 dev-logs: ## Show development logs
 	docker-compose -f docker/docker-compose.dev.yml logs -f docstore-api-dev
 
-########## ########## ########## ########## 
-########## Devlopement Local commands : 
-########## ########## ########## ########## 
+########## ########## ########## ##########
+########## Devlopement Local commands :
+########## ########## ########## ##########
 # Local build
 build-local: ## Build the application locally
 	go build -mod=mod -o docstore-api ./src
 
 run-local: build-local ## Build and run the application locally
-	./docstore-api
+	APP_ENV=development ./docstore-api
 
-########## ########## ########## ########## 
-########## Testing commands : 
-########## ########## ########## ########## 
+run-local-prod: build-local ## Build and run the application locally in production mode
+	APP_ENV=production ./docstore-api
+
+########## ########## ########## ##########
+########## Testing commands :
+########## ########## ########## ##########
 # Testing
 test: ## Run tests locally
-	cd src && go test -v ./... -mod=mod 
+	cd src && go test -v ./... -mod=mod
 
 test-coverage: ## Run tests with coverage report and open in browser
 	cd src && GOFLAGS="-mod=mod" go test -cover ./...
@@ -80,9 +83,9 @@ test-coverage: ## Run tests with coverage report and open in browser
 docker-test: ## Run tests in Docker container
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev go test -v ./...
 
-########## ########## ########## ########## 
+########## ########## ########## ##########
 ########## Swagger
-########## ########## ########## ########## 
+########## ########## ########## ##########
 
 swagger-dev: ## Generate swagger documentation for development environment
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh -c "cd /app/src && swag init -g main.go --output docs --instanceName dev"
@@ -90,9 +93,9 @@ swagger-dev: ## Generate swagger documentation for development environment
 swagger-prod-rebuild: ## Rebuild production image with updated Swagger docs
 	docker-compose -f docker/docker-compose.prod.yml build --no-cache
 
-########## ########## ########## ########## 
+########## ########## ########## ##########
 ########## Utility commands
-########## ########## ########## ########## 
+########## ########## ########## ##########
 
 shell-dev: ## Get shell access to running container in dev
 	docker-compose -f docker/docker-compose.dev.yml exec docstore-api-dev sh
