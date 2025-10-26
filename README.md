@@ -90,7 +90,7 @@ docstore-api/
 │   ├── middleware/
 │   │   └── jwt_middleware.go         # JWT authentication middleware
 │   └── docs/                         # Swagger generated docs
-├── config/
+├── environments/
 │   ├── .env.example                  # Environment template
 │   ├── .env.development              # Development environment
 │   └── .env.production               # Production environment
@@ -282,14 +282,14 @@ The API uses environment variables for configuration with support for multiple e
 
 ### Development Setup
 ```bash
-cp config/.env.example config/.env.development
-# Edit config/.env.development with your development settings
+cp environments/.env.example environments/.env.development
+# Edit environments/.env.development with your development settings
 ```
 
 ### Production Setup
 ```bash
-cp config/.env.example config/.env.production
-# Edit config/.env.production with secure production values
+cp environments/.env.example environments/.env.production
+# Edit environments/.env.production with secure production values
 ```
 
 ### Environment File Loading Priority
@@ -299,18 +299,18 @@ The configuration system loads files in this order:
    - Set via Docker, system, or command line
 
 2. **Environment-Specific File**
-   - `config/.env.development` (when `APP_ENV=development`)
-   - `config/.env.production` (when `APP_ENV=production`)
+   - `environments/.env.development` (when `APP_ENV=development`)
+   - `environments/.env.production` (when `APP_ENV=production`)
 
 3. **General Environment File** (fallback)
-   - `config/.env` (for local overrides)
+   - `environments/.env` (for local overrides)
 
 **Example**: In development (`APP_ENV=development`):
-- Loads `config/.env.development` first
-- Then `config/.env` as fallback
+- Loads `environments/.env.development` first
+- Then `environments/.env` as fallback
 - Environment variables override everything
 
-### Default Credentials (configurable via config/.env)
+### Default Credentials (configurable via environments/.env)
 - **Username**: `admin` (set via `ADMIN_USERNAME`)
 - **Password**: `password` (set via `ADMIN_PASSWORD`)
 - **JWT Secret**: Configurable via `JWT_SECRET`

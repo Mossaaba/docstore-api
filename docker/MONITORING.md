@@ -78,20 +78,3 @@ docker-compose -f docker/docker-compose.prod.yml up grafana prometheus loki prom
 2. **Prometheus**: http://localhost:9090
 3. **API Health**: http://localhost:8080/health
 4. **API Metrics**: http://localhost:8080/metrics
-
-## Troubleshooting
-
-### No logs in Grafana
-1. Check Promtail is running: `docker logs docstore-promtail-prod`
-2. Verify Loki is accessible: `curl http://localhost:3100/ready`
-3. Check container labels are correct
-
-### No metrics in Prometheus
-1. Check Prometheus targets: http://localhost:9090/targets
-2. Verify API is responding: `curl http://localhost:8080/metrics`
-3. Check Prometheus logs: `docker logs docstore-prometheus-prod`
-
-### Grafana dashboard not loading
-1. Verify datasources are configured correctly
-2. Check Grafana logs: `docker logs docstore-grafana-prod`
-3. Ensure dashboard JSON is valid

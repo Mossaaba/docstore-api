@@ -37,3 +37,7 @@ src/docs/swagger.json
 src/docs/swagger.yaml
 ssl/cert.pem
 ssl/key.pem
+environments/.env
+.gitignore
+environments/.env.production
+environments/.env.development

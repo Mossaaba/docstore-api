@@ -7,7 +7,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ../config/.env.production
+      - ../environments/.env.production
     environment:
       - GIN_MODE=release
     restart: unless-stopped

@@ -1,0 +1,121 @@
+name: Advanced Docker Build
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: 'Custom image name'
+        required: false
+        default: 'docstore-api'
+      version_tag:
+        description: 'Custom version tag'
+        required: false
+        default: 'auto'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up environment variables
+        id: config
+        run: |
+          # Default values
+          IMAGE_NAME="docstore-api"
+          IMAGE_TITLE="Document Store API"
+          IMAGE_DESCRIPTION="RESTful document storage API built with Go"
+
+          # Override with workflow inputs if provided
+          if [ "${{ github.event.inputs.image_name }}" != "" ]; then
+            IMAGE_NAME="${{ github.event.inputs.image_name }}"
+          fi
+
+          # Set version based on trigger
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+            IS_RELEASE=true
+          elif [ "${{ github.event.inputs.version_tag }}" != "" ] && [ "${{ github.event.inputs.version_tag }}" != "auto" ]; then
+            VERSION="${{ github.event.inputs.version_tag }}"
+            IS_RELEASE=false
+          else
+            VERSION="${{ github.ref_name }}-$(date +%Y%m%d)-${GITHUB_SHA::8}"
+            IS_RELEASE=false
+          fi
+
+          echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "image_title=${IMAGE_TITLE}" >> $GITHUB_OUTPUT
+          echo "image_description=${IMAGE_DESCRIPTION}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "is_release=${IS_RELEASE}" >> $GITHUB_OUTPUT
+          echo "full_image_name=${REGISTRY}/${{ github.repository_owner }}/${IMAGE_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate tags
+        id: tags
+        run: |
+          FULL_IMAGE="${{ steps.config.outputs.full_image_name }}"
+          TAGS="${FULL_IMAGE}:${{ steps.config.outputs.version }}"
+
+          # Add additional tags based on context
+          if [ "${{ steps.config.outputs.is_release }}" = "true" ]; then
+            TAGS="${TAGS},${FULL_IMAGE}:latest,${FULL_IMAGE}:stable"
+          elif [ "${{ github.ref_name }}" = "main" ]; then
+            TAGS="${TAGS},${FULL_IMAGE}:main,${FULL_IMAGE}:latest-dev"
+          elif [ "${{ github.ref_name }}" = "develop" ]; then
+            TAGS="${TAGS},${FULL_IMAGE}:develop,${FULL_IMAGE}:dev"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "Generated tags: ${TAGS}"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/app.dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: |
+            org.opencontainers.image.title=${{ steps.config.outputs.image_title }}
+            org.opencontainers.image.description=${{ steps.config.outputs.image_description }}
+            org.opencontainers.image.version=${{ steps.config.outputs.version }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Output image information
+        run: |
+          echo "## 🐳 Docker Image Built Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Name:** ${{ steps.config.outputs.full_image_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.config.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${{ steps.tags.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull Commands:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ steps.config.outputs.full_image_name }}:${{ steps.config.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
