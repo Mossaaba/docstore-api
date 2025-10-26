@@ -12,7 +12,7 @@ This document describes the monitoring stack for the DocStore API in production.
 ### Prometheus (Port 9090)
 - **URL**: http://localhost:9090
 - **Purpose**: Metrics collection and storage
-- **Scrapes**: 
+- **Scrapes**:
   - API metrics from `/metrics` endpoint
   - API health from `/health` endpoint
 

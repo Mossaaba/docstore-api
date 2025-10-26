@@ -116,7 +116,7 @@ go test ./...
 
 # Run tests by layer
 go test ./models
-go test ./services  
+go test ./services
 go test ./controllers
 
 # Run with coverage
@@ -149,7 +149,7 @@ go test -v ./...
 ```json
 {
     "id": "string",
-    "name": "string", 
+    "name": "string",
     "description": "string"
 }
 ```
@@ -179,14 +179,14 @@ The configuration system loads files in this order:
 
 1. **Environment Variables** (highest priority)
    - Set via Docker, system, or command line
-   
-2. **Environment-Specific File** 
+
+2. **Environment-Specific File**
    - `config/.env.development` (when `APP_ENV=development`)
    - `config/.env.production` (when `APP_ENV=production`)
-   
+
 3. **General Environment File** (fallback)
    - `config/.env` (for local overrides)
-   
+
 4. **Smart Defaults** (lowest priority)
    - Development: Safe default values
    - Production: Warning values that must be changed
@@ -426,7 +426,7 @@ cp config/.env.devlopement config/.env.devlopement
 # Start development with hot reload (detached)
 make dev
 
-# Generate swagger documentation for dev 
+# Generate swagger documentation for dev
 make swagger-dev
 
 # Run tests in development container
@@ -503,13 +503,12 @@ make image-size    # Show Docker image size
 1. ✅ Catch parameters in input rather than specify name and description
 2. ✅ Add database-in-memory persistence layer (Docker compose)
 3. ✅ ~~Add authentication and authorization (for swagger)~~
-5. Add metrics and monitoring with grafana 
+5. ✅Add metrics and monitoring with grafana
+8. ✅ Add security headers in swagger + indicate prod/dev environment
+
 6. Update the documentation (Setup / Git Instruction / Schema / manipulation )
 7. GitHub action (Build and push docker / run test with coverage / generate release )
-8. Add security headers in swagger + indicate prod/dev environment
-9. Install pre-commit 
-10. Check security 
-11. Check all stuff 
-12. Zip the code    
-
-
+9. Install pre-commit
+10. Check security
+11. Check all stuff
+12. Zip the code

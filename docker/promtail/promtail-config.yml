@@ -52,7 +52,7 @@ scrape_configs:
       - source_labels: ['__meta_docker_container_label_service']
         target_label: 'service'
       - source_labels: ['__meta_docker_container_name']
-        regex: '/(.*)' 
+        regex: '/(.*)'
         target_label: 'container_name'
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: 'logstream'

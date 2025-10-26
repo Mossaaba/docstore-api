@@ -9,32 +9,32 @@ import (
 )
 
 type Config struct {
-	JWTSecret    string
-	AdminUser    string
-	AdminPass    string
-	ServerPort   string
-	Environment  string
+	JWTSecret   string
+	AdminUser   string
+	AdminPass   string
+	ServerPort  string
+	Environment string
 }
 
 // LoadConfig loads configuration from environment variables and .env files
 func LoadConfig() *Config {
 	// Get environment first (can be set via ENV var or default to development)
 	env := getEnv("APP_ENV", "development")
-	
+
 	log.Printf("Loading configuration for environment: %s", env)
-	
+
 	// Load environment-specific file first (highest priority after ENV vars)
 	envFile := fmt.Sprintf(".env.%s", env)
 	// Try multiple possible paths
 	loadEnvFileFromPaths(envFile, []string{
-		fmt.Sprintf("config/.env.%s", env),     // From project root
+		fmt.Sprintf("config/.env.%s", env),    // From project root
 		fmt.Sprintf("../config/.env.%s", env), // From src/ directory
 	})
-	
+
 	// Load general .env file as fallback (lower priority)
 	loadEnvFileFromPaths(".env", []string{
-		"config/.env",     // From project root
-		"../config/.env",  // From src/ directory
+		"config/.env",    // From project root
+		"../config/.env", // From src/ directory
 	})
 
 	config := &Config{
@@ -46,9 +46,9 @@ func LoadConfig() *Config {
 	}
 
 	// Log configuration source (without sensitive data)
-	log.Printf("Configuration loaded - Environment: %s, Port: %s, Admin User: %s", 
+	log.Printf("Configuration loaded - Environment: %s, Port: %s, Admin User: %s",
 		config.Environment, config.ServerPort, config.AdminUser)
-	
+
 	return config
 }
 
@@ -81,12 +81,12 @@ func loadEnvFile(filename string) bool {
 	defer file.Close()
 
 	log.Printf("✓ Loading environment variables from: %s", filename)
-	
+
 	loadedCount := 0
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		
+
 		// Skip empty lines and comments
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
@@ -109,11 +109,11 @@ func loadEnvFile(filename string) bool {
 			log.Printf("  - %s: using environment variable (overriding file)", key)
 		}
 	}
-	
+
 	if loadedCount > 0 {
 		log.Printf("  → Loaded %d variables from %s", loadedCount, filename)
 	}
-	
+
 	return true // Successfully loaded
 }
 

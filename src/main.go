@@ -31,8 +31,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-
-
 func main() {
 	// Load configuration
 	cfg := config.LoadConfig()
